@@ -1,0 +1,112 @@
+/* =========================================================================
+   ANIMATIONS
+   =========================================================================
+   Two kinds of motion only:
+     1. One orchestrated reveal as content arrives.
+     2. Motion that answers something the visitor did.
+   ========================================================================= */
+
+/* ---- Page load: header and page title settle first ---------------------- */
+
+@keyframes settle {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+/* The header fades only. A transform animation here — even one ending at
+   `none` — makes the header a containing block, which would trap the
+   fixed mobile navigation inside it instead of pinning it to the screen. */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.site-header { animation: fadeIn var(--mid) var(--ease-out) both; }
+.page-head   { animation: settle var(--slow) var(--ease-out) 60ms both; }
+
+/* ---- Reveal on arrival -------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--slow) var(--ease-out) var(--delay, 0ms),
+    transform var(--slow) var(--ease-out) var(--delay, 0ms);
+}
+
+/* ---- Standings rows: a single sweep down the table ---------------------- */
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.standings tbody tr {
+  animation: rowIn var(--mid) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 34ms);
+}
+
+/* ---- Form pills pop in after their row ---------------------------------- */
+
+@keyframes pillIn {
+  from { opacity: 0; transform: scale(.6); }
+  to   { opacity: 1; transform: none; }
+}
+.form-pill {
+  animation: pillIn var(--fast) var(--ease-out) both;
+  animation-delay: calc(var(--row, 0) * 34ms + var(--p, 0) * 45ms + 160ms);
+}
+
+/* ---- Tab crossfade ------------------------------------------------------ */
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.tab-panel.is-active { animation: panelIn var(--mid) var(--ease-out) both; }
+
+/* ---- Match rows --------------------------------------------------------- */
+
+.match {
+  animation: rowIn var(--mid) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* ---- The champion's marker breathes, once the table has landed ---------- */
+
+@keyframes glow {
+  0%, 100% { opacity: .55; }
+  50%      { opacity: 1; }
+}
+tr[data-zone="champion"] .c-rank::before {
+  animation: glow 3.4s var(--ease) infinite 1s;
+}
+
+/* ---- Records count up --------------------------------------------------- */
+
+.record .v { transition: color var(--mid) var(--ease); }
+
+/* ---- Setup panel -------------------------------------------------------- */
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(22px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+.setup { animation: riseIn var(--slow) var(--ease-out) both; }
+.setup li {
+  animation: settle var(--mid) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 220ms);
+}
+
+/* =========================================================================
+   REDUCED MOTION
+   Everything above is decoration. Content must never depend on it.
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}

@@ -1,0 +1,195 @@
+/* =========================================================================
+   LAYOUT  —  shell, header, navigation, footer
+   ========================================================================= */
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 var(--s-5);
+}
+
+/* Footer stays at the bottom on short pages. */
+body { display: flex; flex-direction: column; min-height: 100vh; }
+main { flex: 1 0 auto; padding-bottom: var(--s-8); }
+.site-footer { flex: none; margin-top: auto; }
+
+/* ---- Header ------------------------------------------------------------ */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  background: rgba(10, 16, 32, .72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.site-header .shell {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex: none;
+  color: var(--ink);
+}
+.brand img, .brand svg { width: 34px; height: 34px; flex: none; }
+.brand-name {
+  font-variation-settings: "wdth" 112;
+  font-weight: 700;
+  font-size: var(--t-md);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.main-nav { display: flex; gap: var(--s-1); margin-left: auto; }
+
+.main-nav a {
+  position: relative;
+  display: block;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.main-nav a:hover { color: var(--ink); background: rgba(255,255,255,.05); }
+.main-nav a[aria-current="page"] { color: var(--ink); }
+.main-nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: var(--s-3); right: var(--s-3); bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent, var(--premium));
+}
+
+.season-chip {
+  flex: none;
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.season-chip b { color: var(--ink); font-weight: 700; }
+
+/* ---- Page head --------------------------------------------------------- */
+
+.page-head {
+  padding: var(--s-7) 0 var(--s-5);
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: var(--s-6);
+}
+.page-head h1 { font-size: var(--t-2xl); }
+.page-head .kicker {
+  display: block;
+  margin-bottom: var(--s-2);
+  color: var(--accent, var(--muted));
+  font-size: var(--t-sm);
+  font-weight: 700;
+}
+.page-head .sub { color: var(--muted); margin-top: var(--s-3); }
+
+/* ---- Footer ------------------------------------------------------------ */
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--line-soft);
+  padding: var(--s-6) 0;
+  color: var(--faint);
+  font-size: var(--t-sm);
+}
+.site-footer .shell {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+/* ---- Grids ------------------------------------------------------------- */
+
+.grid-cards {
+  display: grid;
+  gap: var(--s-4);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+
+@media (max-width: 1024px) {
+  :root { --t-2xl: 2.1rem; --t-3xl: 2.75rem; }
+}
+
+@media (max-width: 760px) {
+  :root { --t-2xl: 1.8rem; --t-xl: 1.5rem; }
+
+  .shell { padding: 0 var(--s-4); }
+  .page-head { padding: var(--s-5) 0 var(--s-4); margin-bottom: var(--s-5); }
+
+  /* backdrop-filter makes the header a containing block for fixed children,
+     which would pin the nav inside the header instead of to the screen.
+     The header goes near-solid here and the nav carries the blur instead. */
+  .site-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--bg);
+  }
+
+  /* Navigation moves to the thumb. */
+  .main-nav {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 60;
+    margin: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0;
+    padding: var(--s-2) var(--s-2) calc(var(--s-2) + env(safe-area-inset-bottom, 0px));
+    background: rgba(10, 16, 32, .92);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border-top: 1px solid var(--line);
+  }
+  .main-nav a {
+    text-align: center;
+    padding: var(--s-2) var(--s-1);
+    font-size: var(--t-xs);
+  }
+  .main-nav a[aria-current="page"]::after {
+    left: 50%; right: auto; bottom: 2px;
+    width: 18px;
+    transform: translateX(-50%);
+  }
+
+  main { padding-bottom: calc(var(--s-5) + 56px); }
+  .site-footer { padding-bottom: calc(var(--s-5) + 56px); }
+
+  .brand-name { font-size: var(--t-base); }
+  .season-chip { margin-left: auto; }
+}
+
+@media (max-width: 420px) {
+  .brand-name { display: none; }
+  .grid-cards { grid-template-columns: 1fr; }
+}

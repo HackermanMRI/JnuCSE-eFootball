@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixture generator — JnUCSE eFootball</title>
+<style>
+  :root {
+    --ink: #12171f;
+    --muted: #5b6775;
+    --line: #d9e0e8;
+    --paper: #f6f8fa;
+    --accent: #1f6feb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2.5rem 1.5rem 4rem;
+    font: 400 16px/1.6 ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink); background: #fff;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin: 0 0 .35rem; letter-spacing: -.01em; }
+  p.lede { color: var(--muted); margin: 0 0 2rem; max-width: 60ch; }
+  fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 1.25rem; margin: 0 0 1.25rem; }
+  legend { padding: 0 .5rem; font-weight: 600; font-size: .95rem; }
+  label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .4rem; }
+  textarea, input, select {
+    width: 100%; font: inherit; padding: .6rem .7rem;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--paper);
+    color: inherit;
+  }
+  textarea { min-height: 120px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9rem; resize: vertical; }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .row > div { flex: 1 1 180px; }
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    padding: .7rem 1.3rem; border-radius: 8px; border: 1px solid transparent;
+    background: var(--accent); color: #fff;
+  }
+  button.ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+  button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .stat { color: var(--muted); font-size: .9rem; }
+  pre {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+    padding: 1rem; overflow: auto; max-height: 460px;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .82rem; line-height: 1.55;
+    margin: 0;
+  }
+  .err { color: #b42318; font-weight: 600; }
+  @media (max-width: 560px) { body { padding: 1.5rem 1rem 3rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Fixture generator</h1>
+  <p class="lede">
+    Paste a tier's player ids, generate the full double round-robin, then copy the
+    result into that season's <code>premium.js</code> or <code>second-tier.js</code>.
+    Scores come out blank for you to fill in as matches are played.
+  </p>
+
+  <fieldset>
+    <legend>Input</legend>
+    <label for="ids">Player ids, one per line or comma separated</label>
+    <textarea id="ids" spellcheck="false">mrinmoy
+azam
+rifat
+sakib
+tanvir
+nayem
+arif
+joy</textarea>
+
+    <div class="row" style="margin-top:1rem">
+      <div>
+        <label for="season">Season number</label>
+        <input id="season" type="number" min="1" value="1">
+      </div>
+      <div>
+        <label for="tier">Tier</label>
+        <select id="tier">
+          <option value="premium">Premium Tier</option>
+          <option value="second">Second Tier</option>
+        </select>
+      </div>
+      <div>
+        <label for="shuffle">Round order</label>
+        <select id="shuffle">
+          <option value="fixed">Standard</option>
+          <option value="random">Shuffled</option>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="actions">
+    <button id="go">Generate fixtures</button>
+    <button id="copy" class="ghost">Copy to clipboard</button>
+    <span class="stat" id="stat"></span>
+  </div>
+
+  <pre id="out">Press Generate fixtures.</pre>
+</div>
+
+<script type="module">
+import { generateFixtures, expectedMatchCount } from "../js/core/fixtures.js";
+
+const $ = id => document.getElementById(id);
+
+function readIds() {
+  return $("ids").value
+    .split(/[\n,]/).map(s => s.trim().toLowerCase()).filter(Boolean);
+}
+
+function shuffleRounds(fixtures) {
+  const byLeg = { 1: new Map(), 2: new Map() };
+  for (const f of fixtures) {
+    const m = byLeg[f.leg];
+    if (!m.has(f.r)) m.set(f.r, []);
+    m.get(f.r).push(f);
+  }
+  const out = [];
+  let counter = 0;
+  for (const leg of [1, 2]) {
+    const rounds = [...byLeg[leg].values()];
+    for (let i = rounds.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rounds[i], rounds[j]] = [rounds[j], rounds[i]];
+    }
+    for (const group of rounds) {
+      counter++;
+      for (const f of group) out.push({ ...f, r: counter });
+    }
+  }
+  return out;
+}
+
+function render(fixtures, seasonNo, tierLabel) {
+  const pad = (s, n) => String(s).padEnd(n);
+  const width = Math.max(...fixtures.map(f => Math.max(f.a.length, f.b.length))) + 4;
+
+  const lines = [];
+  let leg = null, round = null;
+  for (const f of fixtures) {
+    if (f.leg !== leg) {
+      lines.push("", `  /* ================= LEG ${f.leg} ================= */`);
+      leg = f.leg; round = null;
+    }
+    if (f.r !== round) { lines.push("", `  // Round ${f.r}`); round = f.r; }
+    lines.push(
+      `  { r: ${String(f.r).padStart(2)}, leg: ${f.leg}, ` +
+      `a: ${pad(`"${f.a}",`, width)} b: ${pad(`"${f.b}",`, width)} ag: null, bg: null },`
+    );
+  }
+
+  return `/* =========================================================================
+   SEASON ${seasonNo}  —  ${tierLabel}  —  you edit this file
+   =========================================================================
+   Enter results by replacing the two null values with goal counts.
+
+       ag = goals scored by player a
+       bg = goals scored by player b
+
+   Leave both as null until the match is played. Enter both or neither.
+   Do not change r, leg, a or b.
+   ========================================================================= */
+
+export default [${lines.join("\n")}
+];
+`;
+}
+
+$("go").addEventListener("click", () => {
+  const ids = readIds();
+  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+
+  if (ids.length < 2) {
+    $("out").innerHTML = `<span class="err">Enter at least two player ids.</span>`;
+    $("stat").textContent = "";
+    return;
+  }
+  if (dupes.length) {
+    $("out").innerHTML = `<span class="err">Repeated id: ${[...new Set(dupes)].join(", ")}</span>`;
+    $("stat").textContent = "";
+    return;
+  }
+
+  let fixtures = generateFixtures(ids);
+  if ($("shuffle").value === "random") fixtures = shuffleRounds(fixtures);
+
+  const tierLabel = $("tier").selectedOptions[0].textContent;
+  $("out").textContent = render(fixtures, $("season").value, tierLabel);
+
+  const rounds = Math.max(...fixtures.map(f => f.r));
+  const bye = ids.length % 2 === 1 ? ", one player rests each round" : "";
+  $("stat").textContent =
+    `${ids.length} players · ${fixtures.length} matches · ${rounds} rounds${bye}`;
+
+  if (fixtures.length !== expectedMatchCount(ids.length)) {
+    $("stat").innerHTML += ` <span class="err">— count mismatch, report this.</span>`;
+  }
+});
+
+$("copy").addEventListener("click", async () => {
+  const text = $("out").textContent;
+  if (!text || text.startsWith("Press")) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    $("copy").textContent = "Copied";
+    setTimeout(() => { $("copy").textContent = "Copy to clipboard"; }, 1600);
+  } catch {
+    $("copy").textContent = "Select the text and copy manually";
+  }
+});
+</script>
+</body>
+</html>
