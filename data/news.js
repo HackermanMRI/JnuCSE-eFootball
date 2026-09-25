@@ -30,4 +30,15 @@ export const NEWS = [
 This is a battle for absolute supremacy proudly orchestrated by the CSE JnU eFootball Family. Pure skill will meet lightning-fast reflexes as these warriors fight to entirely dominate the server. Grab your controllers and prepare for action, because the beautiful game is about to reach the ultimate next level!
      `
    },
+   {
+    id: "selection-proposal",
+    title: "LIVE UPDATE: Clash of the Digital Titans!",
+    banner: "assets/news/selectiongoing.jpeg",
+    date: "2026-09-26",
+    pinned: false,
+    body: `*E-SPORTS NETWORK: Channel 99 | Alex "The Joystick" Mercer, Live from the Server Room | Fierce Battles Underway at CSE JnU!*
+The JnU CSE eFootball Community tournament is officially ongoing, and the virtual pitch is on absolute fire! Players are fighting incredibly well, delivering flawless passes, unbreakable defenses, and spectacular finishes. The energy is electric as these digital athletes go head-to-head in a grueling test of skill.
+
+Beyond the fierce rivalry, the true highlight is seeing these eFootball players playing together. The camaraderie on the server is just as impressive as the gameplay itself, proving this is more than just a game. Stay glued to your screens—the battle for the ultimate championship is far from over!`
+   }
 ];

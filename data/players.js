@@ -15,7 +15,7 @@ export const PLAYERS = [
 
    { id: "mrinmoy", name: "Mrinmoy Shimanto", photo: "assets/players/mrinmoy.jpg" },
    { id: "arnish", name: "Arnish Karmoker", photo: "assets/players/arnish.jpg" },
-   { id: "sabid", name: "M Sabid", photo: "assets/players/sabid.jpg" },
+   { id: "sabid", name: "Md. Sabid", photo: "assets/players/sabid.jpg" },
    { id: "sun", name: "Md. Al Muzahid Khan Sun", photo: "assets/players/sun.jpg" },
    { id: "robi", name: "Khairul Islam Robi", photo: "assets/players/robi.jpg" },
    { id: "shifadul", name: "SK Shifadul", photo: "assets/players/shifadul.jpg" },
