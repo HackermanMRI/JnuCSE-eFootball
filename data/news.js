@@ -72,7 +72,7 @@ The virtual pitch opens bright and early on September 26, 2026, at 6:00 AM BDT l
 
    {
     id: "season-01-premium-opening",
-     title: "HERE WE GO! 🚨 Arnish vs. Robi Set for Blockbuster Season Opener!",
+     title: "HERE WE GO! 🚨 Arnish vs Robi Set for Blockbuster Season Opener!",
      banner: "assets/news/soneopen.jpeg",
      date: "2026-09-26",
      pinned: false,
@@ -83,11 +83,11 @@ Full agreement has been reached for this high-intensity clash. With both titans 
 
    {
     id: "season-01-premium-opening",
-     title: "HERE WE GO! 🚨 Rakib vs. Jaheen: Skill Meets Patience in Blockbuster Showdown!",
+     title: "HERE WE GO! 🚨 Sijad vs Rakib: Skill Meets Patience in Blockbuster Showdown!",
      banner: "assets/news/soneopento.jpeg",
      date: "2026-09-26",
      pinned: false,
-     body: `🚨 HERE WE GO! The ultimate tactical battle is locked in for the CSE JnU eFootball League season opener as Rakib takes on Jaheen[cite: 17, 29]! 🎮🔥
+     body: `🚨 HERE WE GO! The ultimate tactical battle is locked in for the CSE JnU eFootball League season opener as Rakib takes on sijad[cite: 17, 29]! 🎮🔥
 
-Full agreement reached: Rakib enters with blazing mechanical skill, while Jaheen brings legendary ice-cold patience. Can Jaheen's iron defense crack Rakib's high-tempo offense? The virtual pitch awaits this epic clash.`}
+Full agreement reached: Rakib enters with blazing mechanical skill, while Sijad brings legendary ice-cold patience. Can Sijad's iron defense crack Rakib's high-tempo offense? The virtual pitch awaits this epic clash.`}
 ];
