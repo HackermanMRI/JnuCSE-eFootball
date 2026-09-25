@@ -17,8 +17,8 @@ export default {
   status: "ongoing",
 
   rosters: {
-    premium: [],
-    second:  []
+    premium: ["arnish","sabid","sun","robi","shifadul","rifat","rimon","nahid","aliul","shuvo"],
+    second:  ["sijad","jaheen","seam","jihad","abdulla","arittro","mrinmoy","walid","abid","piyal","mahir"]
   }
 
   /* Optional, almost never needed. Only used when two players finish level

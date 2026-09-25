@@ -16,10 +16,10 @@ export const CONFIG = {
   // Second Tier automatically holds everyone else.
   // If you change this, read docs/06-RULES-REFERENCE.md first — the season
   // after the change will promote or relegate extra players to rebalance.
-  premiumSize: 8,
+  premiumSize: 10,
 
   // How many go up from Second and down from Premium each season.
-  promotionCount: 2,
+  promotionCount: 3,
 
   /* ---- Display -------------------------------------------------------- */
   formLength: 5,          // how many recent results the W/D/L form string shows
