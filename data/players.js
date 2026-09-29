@@ -29,7 +29,7 @@ export const PLAYERS = [
    { id: "aliul", name: "Aliul Azam", photo: "assets/players/aliul.jpg" },
    { id: "shuvo", name: "Shuvo Sarker Joy", photo: "assets/players/shuvo.jpg" },
    { id: "sijad", name: "Sijad Hossain Chowdhury", photo: "assets/players/sijad.jpg" },
-   { id: "jaheen", name: "Jaheen Inbe Fakhrul", photo: "assets/players/jaheen.jpg" },
+   { id: "jaheen", name: "Zhaheen Ibn Fakhrul", photo: "assets/players/jaheen.jpg" },
    { id: "seam", name: "Shams Seam", photo: "assets/players/seam.jpg" },
    { id: "jihad", name: "Jihad Sarker", photo: "assets/players/jihad.jpg" },
    { id: "abdulla", name: "M Abdulla", photo: "assets/players/abdulla.jpg" },
