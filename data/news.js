@@ -93,7 +93,7 @@ Full agreement reached: Rakib enters with blazing mechanical skill, while Sijad 
 },
 
 {
-    id: "rakib-phone-injured",
+    id: "rifat-phone-injured",
      title: "Shockwaves in JnU CSE eFootball League: Key Player Faces Lengthy Absence After 'Catastrophic' Phone Fracture",
      banner: "assets/news/rifatbhaiinjured.jpeg",
      date: "2026-10-01",
@@ -118,6 +118,23 @@ However, amidst the gloomy prognosis, there is a silver lining. The official rel
 For now, the player faces a long and arduous process of device recovery, while fans are left in suspense about when both will be back at peak performance. The league has promised regular updates.
 
 JNU CSE eFootball League urges all fans and supporters to "STAY TUNED FOR REHABILITATION PROGRESS."
+`},
+
+{
+    id: "comimittee-press-release",
+     title: "🚨 EXCLUSIVE: JnU CSE eFootball League is a MASSIVE Success! 🎮",
+     banner: "assets/news/comiti.jpeg",
+     date: "2026-09-26",
+     pinned: false,
+     body: `
+The tournament is an absolute hit! The management committee is doing elite, top-tier work behind the scenes to make this event flawless. Massive respect and a special thanks to the main man, Mrinmoy Shimanto, for his incredible leadership and vision. A true masterclass in management.
+
+Committee:
+President: Mrinmoy Shimanto
+Director: Arnish Karmoker
+Assistant Director: Mahfuzur Rahman Nahid
+
+Project perfectly executed. HERE WE GO! 🌟
 `}
 
 
