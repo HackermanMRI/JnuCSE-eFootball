@@ -94,16 +94,16 @@ Full agreement reached: Rakib enters with blazing mechanical skill, while Sijad 
 
 {
     id: "rakib-phone-injured",
-     title: "Shockwaves in JNU CSE eFootball League: Key Player Faces Lengthy Absence After 'Catastrophic' Phone Fracture",
+     title: "Shockwaves in JnU CSE eFootball League: Key Player Faces Lengthy Absence After 'Catastrophic' Phone Fracture",
      banner: "assets/news/rifatbhaiinjured.jpeg",
      date: "2026-10-01",
      pinned: false,
      body: `
-     By Sports Desk, JNU Daily
+     By Sports Desk, JnU Daily
 
 Jagannath University, Bangladesh — October 1, 2026
 
-In a major blow that has sent ripples through the entire JNU CSE eFootball League, a star player, *Ashraful Al Rifat* has been forced to take an indefinite leave of absence following a "catastrophic phone failure" on their competition device. The unexpected mechanical injury has thrown the season's competitive landscape into disarray.
+In a major blow that has sent ripples through the entire JnU CSE eFootball League, a star player, *Ashraful Al Rifat* has been forced to take an indefinite leave of absence following a "catastrophic phone failure" on their competition device. The unexpected mechanical injury has thrown the season's competitive landscape into disarray.
 
 The official injury update, released this morning, describes the device failure as "catastrophic" and states that the player’s status has been immediately downgraded to *"Out for Multiple Weeks."* While the exact details of the incident that led to the device's fracture remain under wraps, the ensuing diagnosis makes the gravity of the situation clear.
 
