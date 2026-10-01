@@ -19,8 +19,11 @@ export default {
   rosters: {
     premium: ["arnish","sabid","sun","robi","shifadul","rifat","rimon","nahid","aliul","shuvo"],
     second:  ["sijad","jaheen","seam","jihad","abdulla","arittro","mrinmoy","walid","abid","piyal","mahir"]
-  }
+  },
 
+  tiebreakOrder: { robi: 1, rimon: 2, arnish: 3, shuvo: 4 }
+
+  
   /* Optional, almost never needed. Only used when two players finish level
      on points, goal difference, wins, draws, goals scored AND head-to-head.
      Lower number ranks higher.
