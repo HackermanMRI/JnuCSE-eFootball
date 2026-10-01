@@ -21,7 +21,7 @@ export default {
     second:  ["sijad","jaheen","seam","jihad","abdulla","arittro","mrinmoy","walid","abid","piyal","mahir"]
   },
 
-  tiebreakOrder: { robi: 1, rimon: 2, arnish: 3, shuvo: 4 }
+  tiebreakOrder: { robi: 1, rimon: 2 }
 
   
   /* Optional, almost never needed. Only used when two players finish level

@@ -14,7 +14,7 @@ export default [
   /* ================= LEG 1 ================= */
 
   // Round 1
-  { r:  1, leg: 1, a: "sijad",    b: "piyal",    ag: null, bg: null },
+  { r:  1, leg: 1, a: "sijad",    b: "piyal",    ag: 1, bg: 3 },
   { r:  1, leg: 1, a: "mahir",    b: "abid",     ag: 2, bg: 4 },
   { r:  1, leg: 1, a: "jaheen",   b: "mrinmoy",  ag: 1, bg: 4 },
   { r:  1, leg: 1, a: "seam",     b: "arittro",  ag: 2, bg: 5 },
