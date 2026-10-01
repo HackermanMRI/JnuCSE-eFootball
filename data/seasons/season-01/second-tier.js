@@ -18,7 +18,7 @@ export default [
   { r:  1, leg: 1, a: "mahir",    b: "abid",     ag: 2, bg: 4 },
   { r:  1, leg: 1, a: "jaheen",   b: "mrinmoy",  ag: 1, bg: 4 },
   { r:  1, leg: 1, a: "seam",     b: "arittro",  ag: 2, bg: 5 },
-  { r:  1, leg: 1, a: "jihad",    b: "abdulla",  ag: null, bg: null },
+  { r:  1, leg: 1, a: "jihad",    b: "abdulla",  ag: 2, bg: 1 },
 
   // Round 2
   { r:  2, leg: 1, a: "sijad",    b: "mahir",    ag: null, bg: null },
