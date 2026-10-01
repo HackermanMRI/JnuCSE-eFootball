@@ -89,5 +89,36 @@ Full agreement has been reached for this high-intensity clash. With both titans 
      pinned: false,
      body: `🚨 HERE WE GO! The ultimate tactical battle is locked in for the CSE JnU eFootball League season opener as Rakib takes on sijad[cite: 17, 29]! 🎮🔥
 
-Full agreement reached: Rakib enters with blazing mechanical skill, while Sijad brings legendary ice-cold patience. Can Sijad's iron defense crack Rakib's high-tempo offense? The virtual pitch awaits this epic clash.`}
+Full agreement reached: Rakib enters with blazing mechanical skill, while Sijad brings legendary ice-cold patience. Can Sijad's iron defense crack Rakib's high-tempo offense? The virtual pitch awaits this epic clash.`
+},
+
+{
+    id: "rakib-phone-injured",
+     title: "Shockwaves in JNU CSE eFootball League: Key Player Faces Lengthy Absence After 'Catastrophic' Phone Fracture",
+     banner: "assets/news/rifatbhaiinjured.jpeg",
+     date: "2026-10-01",
+     pinned: false,
+     body: `
+     By Sports Desk, JNU Daily
+
+Jagannath University, Bangladesh — October 1, 2026
+
+In a major blow that has sent ripples through the entire JNU CSE eFootball League, a star player, *Ashraful Al Rifat* has been forced to take an indefinite leave of absence following a "catastrophic phone failure" on their competition device. The unexpected mechanical injury has thrown the season's competitive landscape into disarray.
+
+The official injury update, released this morning, describes the device failure as "catastrophic" and states that the player’s status has been immediately downgraded to *"Out for Multiple Weeks."* While the exact details of the incident that led to the device's fracture remain under wraps, the ensuing diagnosis makes the gravity of the situation clear.
+
+According to a detailed diagnosis report, the player's device, critically damaged, is now undergoing complex "Screen Surgery"—a term which typically describes intricate, micro-component repairs on high-end smartphone displays. This procedure, akin to a delicate medical operation on electronic components, must be successful for the player to have any hope of a future return.
+
+"[cite: *Mrinmoy Shimanto*, a spokesperson for the league's technical committee, commented on the situation:] *'This is a genuine heartbreak for the player and a huge loss for the league. Mechanical failures of this magnitude are rare, but when they happen, the path to recovery is lengthy and uncertain. We are committed to supporting the player through the entire "screen surgery" process and subsequent device rehabilitation.'*"
+
+The player, a vital player to give this league a blow, is set for a significant mid-season absence. The loss of a key player is expected to dramatically shift league dynamics, with rival teams scrambling to adjust their strategies to exploit the new opening in the league table.
+
+However, amidst the gloomy prognosis, there is a silver lining. The official release explicitly states the expected return as "BACK SOON!" contingent on a rigorous process of "Complete Repair and Re-integration." This reintegration phase is crucial, as the player and device must re-learn their mutual inputs and calibrations to restore competitive performance.
+
+For now, the player faces a long and arduous process of device recovery, while fans are left in suspense about when both will be back at peak performance. The league has promised regular updates.
+
+JNU CSE eFootball League urges all fans and supporters to "STAY TUNED FOR REHABILITATION PROGRESS."
+`}
+
+
 ];
