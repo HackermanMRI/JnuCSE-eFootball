@@ -22,10 +22,10 @@ export default [
 
   // Round 2
   { r:  2, leg: 1, a: "arnish",    b: "nahid",     ag: 5, bg: 1 },
-  { r:  2, leg: 1, a: "aliul",     b: "rimon",     ag: 2, bg: 4 },
+  { r:  2, leg: 1, a: "aliul",     b: "rimon",     ag: 2 , bg: 4 },
   { r:  2, leg: 1, a: "shuvo",     b: "rifat",     ag: null, bg: null },
   { r:  2, leg: 1, a: "sabid",     b: "shifadul",  ag: 1, bg: 0},
-  { r:  2, leg: 1, a: "sun",       b: "robi",      ag: null, bg: null },
+  { r:  2, leg: 1, a: "sun",       b: "robi",      ag: 3, bg: 2 },
 
   // Round 3
   { r:  3, leg: 1, a: "arnish",    b: "sabid",     ag: null, bg: null },
