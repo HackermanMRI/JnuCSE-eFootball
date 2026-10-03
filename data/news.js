@@ -135,6 +135,24 @@ Director: Arnish Karmoker
 Assistant Director: Mahfuzur Rahman Nahid
 
 Project perfectly executed. HERE WE GO! 🌟
+`},
+
+{
+    id: "robi-lost-to-sun",
+     title: "CHAMPION DOWN: Muzahid Stuns Robi in 3-2 eFootball Thriller",
+     banner: "assets/news/robilost.jpeg",
+     date: "2026-10-03",
+     pinned: false,
+     body: `
+     By Sports Desk, JnU Daily
+
+Jagannath University, Bangladesh — October 1, 2026
+
+The JnU CSE eFootball League has been turned entirely upside down. In a staggering upset that proves no one is invincible, reigning champion Khairul Islam Robi suffered a disastrous 3-2 defeat at the hands of Al Muzahid Khan.
+
+The virtual pitch witnessed pure drama as the final whistle blew. Robi, usually calm and composed, was left staring at the ground in deep frustration. Sporting his Barcelona jersey, the weight of the missed opportunities was heavily visible on the shocked champion's face.
+
+In the post-match press review, a visibly shaken Robi broke down the disastrous final minutes:"there was so much miss at the ending time, i think that caused the loose tonight, i should be more careful next time"   This shocker injects pure thrill into the remainder of the season. The aura of the unbeatable champion is officially broken, sending a clear message to every other contender: on this virtual pitch, absolutely anything can happen.
 `}
 
 
