@@ -153,6 +153,25 @@ The JnU CSE eFootball League has been turned entirely upside down. In a staggeri
 The virtual pitch witnessed pure drama as the final whistle blew. Robi, usually calm and composed, was left staring at the ground in deep frustration. Sporting his Barcelona jersey, the weight of the missed opportunities was heavily visible on the shocked champion's face.
 
 In the post-match press review, a visibly shaken Robi broke down the disastrous final minutes:"there was so much miss at the ending time, i think that caused the loose tonight, i should be more careful next time"   This shocker injects pure thrill into the remainder of the season. The aura of the unbeatable champion is officially broken, sending a clear message to every other contender: on this virtual pitch, absolutely anything can happen.
+`}, 
+
+{
+    id: "mrinmoy-win-atreak",
+     title: "MRINMOY’S SURGE: From Selection Struggle to Second Tier Dominance",
+     banner: "assets/news/2winsmri.jpeg",
+     date: "2026-10-05",
+     pinned: false,
+     body: `
+     DHAKA — In one of the most stunning turnarounds in recent competitive gaming history, Mrinmoy Shimanto has transformed from an underdog into an unstoppable force in the JnU CSE eFootball League.
+
+After surviving a bruising selection tournament where victory seemed nearly impossible, Shimanto has silenced critics with a ruthless 2–0 win streak in the opening rounds of the Second Tier League.
+     
+The Tactical Awakening
+Shimanto’s early campaign was defined by hardship, managing only a single victory during the grueling selection stage. However, his transition into the Second Tier has displayed a complete evolution in tactical discipline and high-pressure composure.
+
+His back-to-back victories have not only humbled rival contenders but also sent shockwaves across the division. Opponents who previously dismissed his chances now face a fierce competitor operating at peak confidence.
+
+With momentum fully on his side, Shimanto is driven by a singular goal: securing automatic promotion to the elite Premium League. The crucial question now remains whether any challenger can halt his explosive win streak before he reaches the top flight.
 `}
 
 
