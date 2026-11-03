@@ -10,7 +10,8 @@ import { el, mount, emptyState } from "./ui/dom.js";
 import { tabs, revealIn } from "./ui/interactions.js";
 import { initGlass } from "./ui/glass.js";
 import { renderStandings, renderMatches } from "./ui/render-tables.js";
-import { renderPlayers, renderNews, renderHistory, renderHallOfFame } from "./ui/render-content.js";
+import { renderNews, renderHistory, renderHallOfFame } from "./ui/render-content.js";
+import { renderPlayersPage } from "./ui/render-players.js";
 
 initGlass();
 
@@ -26,6 +27,7 @@ switch (page) {
   case "premium": tierPage("premium"); break;
   case "second":  tierPage("second"); break;
   case "history": historyPage(); break;
+  case "players": playersPage(); break;
 }
 
 revealIn(document.body);
@@ -35,7 +37,7 @@ revealIn(document.body);
    ========================================================================= */
 
 function pageTitle(p) {
-  return { home: "News", premium: "Premium Tier", second: "Second Tier", history: "Tier History" }[p] || "";
+  return { home: "News", premium: "Premium Tier", second: "Second Tier", history: "Tier History", players: "Players" }[p] || "";
 }
 
 function chrome() {
@@ -154,10 +156,19 @@ function tierPage(tier) {
   if (tier === "premium") {
     items.push({ id: "hall", label: "Hall of Fame", build: () => renderHallOfFame(model) });
   }
-  items.push({ id: "players", label: "Players", build: () => renderPlayers(model, season, tier) });
 
   host.replaceChildren();
   tabs(host, items);
+}
+
+function playersPage() {
+  const host = document.getElementById("content");
+  if (!model.started) {
+    mount(host, setupPanel());
+    return;
+  }
+  mount(host, renderPlayersPage(model));
+  revealIn(host);
 }
 
 function historyPage() {

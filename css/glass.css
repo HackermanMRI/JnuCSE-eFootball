@@ -177,6 +177,41 @@
 }
 .feed-more:active { transform: scale(.95); }
 
+/* ---- Search field: a glass pill ----------------------------------------- */
+
+.search {
+  border-color: transparent;
+  background: var(--glass-bg-bar);
+  -webkit-backdrop-filter: var(--glass-bf-bar);
+  backdrop-filter: var(--glass-bf-bar);
+  box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--glass-line), inset 0 1px 0 var(--glass-top);
+}
+.search:focus-within {
+  box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--accent, var(--premium)),
+              0 0 0 3px color-mix(in srgb, var(--accent, var(--premium)) 25%, transparent);
+}
+.search-reset {
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+  transition: transform var(--mid) var(--spring);
+}
+.search-reset:hover { background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.12)); }
+.search-reset:active { transform: scale(.94); }
+
+/* Player photo and trophy stars */
+.portrait {
+  box-shadow: 0 10px 28px -10px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.14);
+}
+.portrait::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,.16), transparent 28%);
+}
+.star--premium { filter: drop-shadow(0 0 6px rgba(242,179,61,.55)); }
+.star--second  { filter: drop-shadow(0 0 6px rgba(63,200,190,.5)); }
+.trophy {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+
 /* ---- Banners and empty states: glass, but keep the semantic border ------ */
 
 .banner, .empty {

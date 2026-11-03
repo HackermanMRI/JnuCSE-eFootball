@@ -9,6 +9,8 @@ import { generateFixtures, expectedMatchCount, pairKey } from "../js/core/fixtur
 import { computeTable, splitFixtures, matchFeed, isPlayed } from "../js/core/standings.js";
 import { movementPlan, closeSeason, inheritRosters } from "../js/core/season.js";
 import { buildRecords } from "../js/core/stats.js";
+import { buildCareers } from "../js/core/careers.js";
+import { matchesQuery, normalize } from "../js/core/search.js";
 import { POINTS } from "../js/core/rules.js";
 
 /* ---- tiny test harness ------------------------------------------------ */
@@ -589,6 +591,117 @@ describe("Full season simulation", () => {
     matchFeed(s, "recent").pop();
     eq(JSON.stringify(s), before);
     eq(matchFeed({ played: [], upcoming: [] }, "recent"), []);
+  });
+});
+
+describe("Player careers", () => {
+  /* A hand-built season: just the fields the careers module reads. */
+  const season = (number, completed, premium, second, prem = [], sec = [], outcome = null) => ({
+    number, completed,
+    rosters: { premium, second },
+    fixtures: { premium: prem, second: sec },
+    tables: { premium: [], second: [] },
+    outcome
+  });
+  const byId = new Map([["z", { name: "Zed" }], ["a", { name: " Amir " }], ["m", { name: "Mia" }], ["q", { name: "Quiet" }]]);
+  const find = (cs, id) => cs.find(c => c.id === id);
+
+  it("totals, goals and win percentage add up", () => {
+    const s = season(1, false, ["a", "z"], [], [
+      fx("a", "z", 3, 0, 1), fx("z", "a", 1, 1, 2), fx("a", "z", 0, 2, 3), fx("a", "z", null, null, 4)
+    ]);
+    const a = find(buildCareers([s], byId), "a");
+    eq([a.played, a.won, a.drawn, a.lost], [3, 1, 1, 1]);
+    eq([a.goalsFor, a.goalsAgainst], [4, 3]);
+    ok(Math.abs(a.winPct - 100 / 3) < 1e-9, "win % = won / played * 100");
+  });
+
+  it("a player with no matches is listed with empty stats", () => {
+    const s = season(1, false, ["a", "q"], [], [fx("a", "q", null, null, 1)]);
+    const q = find(buildCareers([s], byId), "q");
+    eq([q.played, q.winPct, q.biggestWin, q.biggestLoss, q.mostGoalsInSeason, q.bestWinStreak], [0, null, null, null, null, null]);
+  });
+
+  it("biggest win and loss use margin, then goals, then the earlier match", () => {
+    const s = season(1, false, ["a", "z"], [], [
+      fx("a", "z", 2, 0, 1), fx("a", "z", 4, 2, 2), fx("a", "z", 3, 1, 3),   // margin 2 each: 4-2 has most goals
+      fx("z", "a", 1, 0, 4), fx("z", "a", 3, 1, 5), fx("z", "a", 3, 1, 6)    // a loses 0-1, 1-3, 1-3
+    ]);
+    const a = find(buildCareers([s], byId), "a");
+    eq([a.biggestWin.for, a.biggestWin.against, a.biggestWin.round], [4, 2, 2]);
+    eq([a.biggestLoss.for, a.biggestLoss.against, a.biggestLoss.round], [1, 3, 5]); // earlier of the two 1-3
+    eq(a.biggestWin.opponent, "z");
+  });
+
+  it("win streak resets on a draw or a loss and never crosses seasons", () => {
+    const s1 = season(1, true, ["a", "z"], [], [
+      fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2), fx("a", "z", 1, 1, 3), fx("a", "z", 1, 0, 4), fx("a", "z", 2, 0, 5), fx("a", "z", 3, 0, 6)
+    ], [], { champion: "z", secondTable: [] });
+    const s2 = season(2, false, ["a", "z"], [], [fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2)]);
+    const a = find(buildCareers([s1, s2], byId), "a");
+    eq(a.bestWinStreak.length, 3);
+    eq(a.bestWinStreak.seasons, [{ season: 1, live: false }]);          // 2 + 2 across the seasons must NOT make 4
+  });
+
+  it("tied records list every tied season, and flag a season in progress", () => {
+    const s1 = season(1, true, ["a", "z"], [], [fx("a", "z", 2, 0, 1), fx("a", "z", 1, 0, 2)], [], { champion: "z", secondTable: [] });
+    const s2 = season(2, false, ["a", "z"], [], [fx("a", "z", 3, 0, 1)]);
+    const a = find(buildCareers([s1, s2], byId), "a");
+    eq(a.mostGoalsInSeason, { goals: 3, seasons: [{ season: 1, live: false }, { season: 2, live: true }] });
+    eq(a.bestWinStreak.length, 2);
+  });
+
+  it("trophies: Premium champion and Second Tier winner, completed seasons only", () => {
+    const done = season(1, true, ["a"], ["m"], [], [], { champion: "a", secondTable: [{ id: "m" }, { id: "q" }] });
+    const live = season(2, false, ["a"], ["m"], [], [], null);
+    const cs = buildCareers([done, live], byId);
+    eq(find(cs, "a").trophies, [{ season: 1, tier: "premium" }]);
+    eq(find(cs, "m").trophies, [{ season: 1, tier: "second" }]);
+    eq(find(cs, "q") , undefined);   // q was only in a table row here, not on any roster
+  });
+
+  it("everyone ever on a roster is listed once, A to Z, trimmed names", () => {
+    const s1 = season(1, true, ["z"], ["a"], [], [], { champion: "z", secondTable: [{ id: "a" }] });
+    const s2 = season(2, false, ["a"], ["z", "m"], [], []);
+    const cs = buildCareers([s1, s2], byId);
+    eq(cs.map(c => c.id), ["a", "m", "z"]);
+    eq(find(cs, "a").seasons, [{ season: 1, tier: "second" }, { season: 2, tier: "premium" }]);
+  });
+
+  it("careers agree with the standings table for a single season", () => {
+    const f = [fx("a", "z", 3, 1, 1), fx("z", "a", 2, 2, 2), fx("a", "m", 0, 1, 3), fx("m", "z", 4, 0, 4)];
+    const players = ["a", "z", "m"];
+    const table = computeTable(players, f, {});
+    const cs = buildCareers([season(1, false, players, [], f)], byId);
+    for (const row of table) {
+      const c = find(cs, row.id);
+      eq([c.played, c.won, c.drawn, c.lost, c.goalsFor, c.goalsAgainst],
+         [row.p, row.w, row.d, row.l, row.gf, row.ga], row.id);
+    }
+  });
+});
+
+describe("Search", () => {
+  it("ignores case, accents and extra spaces", () => {
+    eq(normalize("  Sakif   MAHDI  Rimón "), "sakif mahdi rimon");
+    ok(matchesQuery("Sakif Mahdi Rimon", "RIM"));
+    ok(matchesQuery("Sakif Mahdi Rimon", "  mahdi  sakif "));
+  });
+  it("every word must match; an empty query matches everything", () => {
+    ok(!matchesQuery("Sakif Mahdi Rimon", "sakif robi"));
+    ok(matchesQuery("Sakif Mahdi Rimon", ""));
+    ok(matchesQuery("Sakif Mahdi Rimon", "   "));
+  });
+  it("finds a fixture by either player, or by both", () => {
+    const pair = ["Arnish Karmoker", "Khairul Islam Robi"];
+    ok(matchesQuery(pair, "robi"));
+    ok(matchesQuery(pair, "arnish robi"));
+    ok(!matchesQuery(pair, "sun"));
+  });
+  it("treats pattern characters as plain text", () => {
+    ok(!matchesQuery("Arnish Karmoker", ".*"));
+    ok(!matchesQuery("Arnish Karmoker", "(arn"));
+    ok(matchesQuery("M. Abdulla", "m."));
   });
 });
 

@@ -49,7 +49,9 @@ Steps 7 and 8 raise a notice on the site so you know a manual decision is outsta
 
 ## Champion
 
-Premium Tier rank 1 wins the league. Second Tier has no champion.
+Premium Tier rank 1 wins the league. Second Tier has no league champion.
+
+**Trophies on the Players page** are a separate, display-only rule: the Premium Tier champion earns a gold star, and the Second Tier rank 1 ("Second Tier winner") earns a teal star. They are given only when a season is marked `"completed"`. Second Tier winners do not appear in the Hall of Fame or on the History page, and the league champion is still only the Premium rank 1.
 
 ## Promotion and relegation
 
@@ -93,6 +95,8 @@ A season is `"ongoing"` until you set it to `"completed"`. The season number is 
 | Fixture generation | `js/core/fixtures.js` |
 | Promotion, relegation, inheritance | `js/core/season.js` |
 | Hall of Fame records | `js/core/stats.js` |
+| Player career stats and trophies | `js/core/careers.js` |
+| Name search | `js/core/search.js` |
 | Data checking | `js/core/validate.js` |
 | Tier sizes, display counts | `data/config.js` |
 
