@@ -45,7 +45,7 @@ export default [
   { r:  5, leg: 1, a: "sijad",    b: "jaheen",   ag: 2, bg: 1 },
   { r:  5, leg: 1, a: "jihad",    b: "mahir",    ag: 2, bg: 3 },
   { r:  5, leg: 1, a: "abdulla",  b: "piyal",    ag: 1, bg: 5 },
-  { r:  5, leg: 1, a: "arittro",  b: "abid",     ag: null, bg: null },
+  { r:  5, leg: 1, a: "arittro",  b: "abid",     ag: 2, bg: 3 },
   { r:  5, leg: 1, a: "mrinmoy",  b: "walid",    ag: null, bg: null },
 
   // Round 6
