@@ -58,7 +58,7 @@ export default [
   // Round 7
   { r:  7, leg: 1, a: "arnish",    b: "rimon",     ag: 2, bg: 1 },
   { r:  7, leg: 1, a: "nahid",     b: "rifat",     ag: null, bg: null },
-  { r:  7, leg: 1, a: "aliul",     b: "shifadul",  ag: null, bg: null },
+  { r:  7, leg: 1, a: "aliul",     b: "shifadul",  ag: 5, bg: 1 },
   { r:  7, leg: 1, a: "shuvo",     b: "robi",      ag: null, bg: null },
   { r:  7, leg: 1, a: "sabid",     b: "sun",       ag: null, bg: null },
 
