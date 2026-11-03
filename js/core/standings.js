@@ -86,3 +86,10 @@ export function splitFixtures(fixtures) {
     upcoming: ordered.filter(fx => !isPlayed(fx))
   };
 }
+
+/* The order a match list is shown in. "upcoming" runs from the next match
+   to the last one in the season; "recent" runs from the latest result back
+   to the very first match. Returns a new array. */
+export function matchFeed(split, kind) {
+  return kind === "recent" ? [...split.played].reverse() : [...split.upcoming];
+}

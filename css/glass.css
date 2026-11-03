@@ -167,6 +167,16 @@
 }
 .match:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.07); }
 
+.feed-more {
+  border-color: var(--glass-line);
+  background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.05)), rgba(14,22,40,.5);
+  -webkit-backdrop-filter: var(--glass-bf-bar);
+  backdrop-filter: var(--glass-bf-bar);
+  box-shadow: inset 0 1px 0 var(--glass-top), 0 6px 18px -8px rgba(0,0,0,.5);
+  transition: transform var(--mid) var(--spring), color var(--fast) var(--ease);
+}
+.feed-more:active { transform: scale(.95); }
+
 /* ---- Banners and empty states: glass, but keep the semantic border ------ */
 
 .banner, .empty {

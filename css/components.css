@@ -265,6 +265,28 @@ tr[data-zone="relegation"]{ background: rgba(242,104,107,.045); }
   border: 1px dashed var(--line);
 }
 
+/* Infinite-scroll footer: the button is the scroll trigger and the
+   fallback; the status line says how far through the list you are. */
+.feed-more {
+  display: block;
+  margin: var(--s-4) auto 0;
+  padding: var(--s-2) var(--s-5);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+.feed-more:hover { color: var(--ink); border-color: var(--accent-dim, var(--line)); }
+.feed-status {
+  margin: var(--s-3) auto 0;
+  text-align: center;
+  color: var(--faint);
+  font-size: var(--t-xs);
+}
+.feed-status:empty { display: none; }
+
 /* ---- Accordion cards (news + players) ---------------------------------- */
 
 .acc {
