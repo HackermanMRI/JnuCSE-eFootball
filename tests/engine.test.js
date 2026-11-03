@@ -6,7 +6,7 @@
    ========================================================================= */
 
 import { generateFixtures, expectedMatchCount, pairKey } from "../js/core/fixtures.js";
-import { computeTable, splitFixtures, isPlayed } from "../js/core/standings.js";
+import { computeTable, splitFixtures, matchFeed, isPlayed } from "../js/core/standings.js";
 import { movementPlan, closeSeason, inheritRosters } from "../js/core/season.js";
 import { buildRecords } from "../js/core/stats.js";
 import { POINTS } from "../js/core/rules.js";
@@ -564,6 +564,31 @@ describe("Full season simulation", () => {
     eq(s.played.length, 1);
     eq(s.upcoming.length, 1);
     eq(isPlayed(s.played[0]), true);
+  });
+
+  it("match feeds cover every match: upcoming oldest-first, recent newest-first", () => {
+    const f = [
+      fx("a", "b", 1, 0, 1, 1), fx("c", "d", 2, 2, 1, 2),
+      fx("a", "c", 3, 1, 2, 3), fx("b", "d", null, null, 2, 4),
+      fx("a", "d", null, null, 3, 5)
+    ];
+    const s = splitFixtures(f);
+    const recent = matchFeed(s, "recent");
+    const upcoming = matchFeed(s, "upcoming");
+    eq(recent.length, s.played.length);
+    eq(upcoming.length, s.upcoming.length);
+    eq(recent.map(m => m.r), [2, 1, 1]);       // latest first, ends at the first match
+    eq(upcoming.map(m => m.r), [2, 3]);        // next first, ends at the last match
+    eq(recent[recent.length - 1], s.played[0]);
+    eq(upcoming[upcoming.length - 1], s.upcoming[s.upcoming.length - 1]);
+  });
+
+  it("match feeds are copies and leave the split untouched", () => {
+    const s = splitFixtures([fx("a", "b", 1, 0, 1, 1), fx("a", "c", 2, 0, 1, 2)]);
+    const before = JSON.stringify(s);
+    matchFeed(s, "recent").pop();
+    eq(JSON.stringify(s), before);
+    eq(matchFeed({ played: [], upcoming: [] }, "recent"), []);
   });
 });
 

@@ -6,6 +6,7 @@
    ========================================================================= */
 
 import { el, nameOf, avatar, signed, formRow, emptyState, pad } from "./dom.js";
+import { matchFeed } from "../core/standings.js";
 
 /* ---- Standings ---------------------------------------------------------- */
 
@@ -112,11 +113,16 @@ function tableKey(season, tier) {
 
 /* ---- Matches ------------------------------------------------------------ */
 
-export function renderMatches(model, season, tier, kind, limit) {
-  const list = season.split[tier][kind === "recent" ? "played" : "upcoming"];
-  const shown = kind === "recent" ? list.slice(-limit).reverse() : list.slice(0, limit);
+/**
+ * Match list with infinite scroll. `batch` matches are drawn first; the rest
+ * are drawn in further batches as the visitor nears the bottom, until the
+ * last upcoming match (or the very first match of the season, for Recent).
+ * `batch` comes from recentMatchesCount / upcomingMatchesCount in config.js.
+ */
+export function renderMatches(model, season, tier, kind, batch) {
+  const feed = matchFeed(season.split[tier], kind);
 
-  if (!shown.length) {
+  if (!feed.length) {
     return kind === "recent"
       ? emptyState("No results yet",
           "Matches appear here as soon as you enter a score. " +
@@ -125,19 +131,53 @@ export function renderMatches(model, season, tier, kind, limit) {
           "Every fixture in this tier has a result. The season is ready to close.");
   }
 
-  const wrap = el("div", { class: "match-list" },
-    shown.map((fx, i) => matchRow(model, fx, i))
-  );
+  const size = Math.max(1, Number.isInteger(batch) ? batch : 10);
+  const noun = kind === "recent" ? "results" : "fixtures";
+  const endNote = kind === "recent"
+    ? "That was the first match of the season."
+    : "That is the last match of the season.";
 
-  const remaining = list.length - shown.length;
-  if (remaining > 0) {
-    return el("div", {}, wrap,
-      el("p", {
-        style: { color: "var(--faint)", fontSize: "var(--t-sm)", marginTop: "var(--s-4)" }
-      }, `${remaining} more ${remaining === 1 ? "match" : "matches"} in this tier.`)
-    );
+  const list = el("div", { class: "match-list" });
+  const more = el("button", { class: "feed-more", type: "button" });
+  const status = el("p", { class: "feed-status", role: "status" });
+  let shown = 0;
+
+  /* Draw the next batch. Row delays restart at 0 each time so a late batch
+     does not wait behind a long stagger. */
+  function drawNext() {
+    const next = feed.slice(shown, shown + size);
+    list.append(...next.map((fx, i) => matchRow(model, fx, i)));
+    shown += next.length;
+
+    const left = feed.length - shown;
+    status.textContent = left > 0 ? `Showing ${shown} of ${feed.length} ${noun}` : "";
+    if (left > 0) {
+      more.textContent = `Load ${Math.min(size, left)} more`;
+    } else {
+      more.remove();
+      observer?.disconnect();
+      status.textContent = `${endNote} (${feed.length} ${noun} in total)`;
+    }
   }
-  return wrap;
+
+  /* The button is also the scroll trigger. Scrolling near it loads the next
+     batch; keyboard users and browsers without IntersectionObserver press it. */
+  more.addEventListener("click", drawNext);
+
+  const observer = "IntersectionObserver" in window
+    ? new IntersectionObserver(entries => {
+        if (!entries.some(e => e.isIntersecting)) return;
+        drawNext();
+        /* Still in view after drawing (tall screen, short batch)? Observing
+           again makes the browser re-report, so the next batch follows. */
+        if (more.isConnected) { observer.unobserve(more); observer.observe(more); }
+      }, { rootMargin: "0px 0px 480px 0px" })
+    : null;
+
+  const root = el("div", { class: "feed" }, list, more, status);
+  drawNext();
+  if (feed.length > shown) observer?.observe(more);
+  return root;
 }
 
 export function matchRow(model, fx, i = 0) {

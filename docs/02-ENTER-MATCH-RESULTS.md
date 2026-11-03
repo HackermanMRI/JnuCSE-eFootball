@@ -29,6 +29,15 @@ Mrinmoy beat Nayem 2–1, so:
 
 Save the file, refresh the site. The table, goal difference, form, rankings, recent matches and upcoming matches all update by themselves. There is nothing else to change anywhere.
 
+## How the Recent and Upcoming tabs scroll
+
+Both tabs keep loading as you scroll, so every match is reachable:
+
+- **Upcoming** starts at the next match and runs to the last match of the season.
+- **Recent** starts at the latest result and runs back to the first match of the season.
+
+A line at the bottom shows how far through you are, and there is a "Load more" button if you prefer to tap. To change how many matches load at a time, edit `recentMatchesCount` and `upcomingMatchesCount` in `data/config.js` (default 10 each). They no longer cap the list, they only set the batch size.
+
 ## Rules for entering
 
 - **Enter both numbers or neither.** A match with only one score filled in is reported as an error on the site and is not counted.

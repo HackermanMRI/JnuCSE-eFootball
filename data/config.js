@@ -23,6 +23,8 @@ export const CONFIG = {
 
   /* ---- Display -------------------------------------------------------- */
   formLength: 5,          // how many recent results the W/D/L form string shows
-  recentMatchesCount: 10, // how many played matches the "Recent" tab lists
-  upcomingMatchesCount: 10 // how many unplayed matches the "Upcoming" tab lists
+  // The Recent and Upcoming tabs scroll on until the first / last match of
+  // the season. These two numbers are how many matches load at a time.
+  recentMatchesCount: 10,   // "Recent": matches added per scroll
+  upcomingMatchesCount: 10  // "Upcoming": matches added per scroll
 };
