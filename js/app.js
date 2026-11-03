@@ -8,8 +8,11 @@
 import { buildModel } from "./core/model.js";
 import { el, mount, emptyState } from "./ui/dom.js";
 import { tabs, revealIn } from "./ui/interactions.js";
+import { initGlass } from "./ui/glass.js";
 import { renderStandings, renderMatches } from "./ui/render-tables.js";
 import { renderPlayers, renderNews, renderHistory, renderHallOfFame } from "./ui/render-content.js";
+
+initGlass();
 
 const model = buildModel();
 const page = document.body.dataset.page;

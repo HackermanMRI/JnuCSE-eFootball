@@ -1,0 +1,351 @@
+/* =========================================================================
+   LIQUID GLASS
+   =========================================================================
+   A visual layer on top of components.css. Remove the <link> to this file
+   and the site falls back to its flat look; nothing else depends on it.
+
+   Three kinds of surface:
+     bar    floating capsules (header, mobile nav, tabs, season chip)
+     panel  large cards that get real backdrop blur + a rim light that
+            follows the pointer (tables, accordions, records, setup)
+     lite   small repeated things (match rows, stat boxes). Translucent
+            only: a backdrop-filter inside another backdrop-filter does
+            not see the page, and ~150 blurred rows would be slow anyway.
+
+   All colours, blur and tint come from the --glass-* tokens in tokens.css.
+   ========================================================================= */
+
+/* ---- Ambient background -------------------------------------------------
+   Glass only reads as glass if there is colour behind it to bend. Four soft
+   pools of light drift slowly; the second one takes the tier accent. */
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+.ambient i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  will-change: transform;
+}
+.ambient i:nth-child(1) {
+  width: 62vmax; height: 62vmax; left: -18vmax; top: -24vmax;
+  background: radial-gradient(closest-side, rgba(63,122,200,.30), transparent);
+  animation: drift-a 34s ease-in-out infinite alternate;
+}
+.ambient i:nth-child(2) {
+  width: 52vmax; height: 52vmax; right: -20vmax; top: 6vh;
+  background: radial-gradient(closest-side, rgba(242,179,61,.20), transparent);
+  background: radial-gradient(closest-side,
+    color-mix(in srgb, var(--accent, var(--premium)) 26%, transparent), transparent);
+  animation: drift-b 41s ease-in-out infinite alternate;
+}
+.ambient i:nth-child(3) {
+  width: 56vmax; height: 56vmax; left: 8vw; bottom: -30vmax;
+  background: radial-gradient(closest-side, rgba(63,200,190,.20), transparent);
+  animation: drift-c 38s ease-in-out infinite alternate;
+}
+.ambient i:nth-child(4) {
+  width: 42vmax; height: 42vmax; right: 6vw; bottom: -18vmax;
+  background: radial-gradient(closest-side, rgba(125,92,226,.22), transparent);
+  animation: drift-a 47s ease-in-out infinite alternate-reverse;
+}
+@keyframes drift-a { to { transform: translate3d(9vmax, 7vmax, 0) scale(1.08); } }
+@keyframes drift-b { to { transform: translate3d(-8vmax, 10vmax, 0) scale(.94); } }
+@keyframes drift-c { to { transform: translate3d(11vmax, -6vmax, 0) scale(1.1); } }
+
+/* ---- Shared glass surfaces (panels) -------------------------------------
+   `border-color: transparent` hands the edge to the rim light below. */
+
+.table-wrap, .acc, .record, .season-card, .setup {
+  position: relative;
+  isolation: isolate;
+  border-color: transparent;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-bf);
+  backdrop-filter: var(--glass-bf);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-top);
+  transition:
+    transform var(--mid) var(--spring),
+    box-shadow var(--mid) var(--ease),
+    background var(--mid) var(--ease);
+}
+
+/* Rim light: a 1px ring, bright at the top-left and bottom-right where a
+   curved glass edge catches light, faint in between. Drawn with a masked
+   gradient so the glass itself stays transparent. */
+.table-wrap::after, .acc::after, .record::after, .season-card::after, .setup::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(140deg,
+    rgba(255,255,255,.55), rgba(255,255,255,.07) 30%,
+    rgba(255,255,255,.02) 58%, rgba(255,255,255,.26));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+}
+
+/* Pointer light: a soft specular pool that tracks the cursor (js/ui/glass.js
+   sets --mx / --my). z-index -1 puts it above the glass but under content. */
+.table-wrap::before, .acc::before, .record::before, .season-card::before, .setup::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255,255,255,.13), transparent 62%);
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%),
+    color-mix(in srgb, var(--accent, #9db7ff) 24%, rgba(255,255,255,.10)), transparent 62%);
+  transition: opacity var(--mid) var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .table-wrap:hover::before, .acc:hover::before, .record:hover::before,
+  .season-card:hover::before, .setup:hover::before { opacity: 1; }
+  .record:hover, .season-card:hover { transform: translateY(-2px); }
+}
+.acc.is-open { box-shadow: var(--glass-shadow), 0 24px 50px -16px rgba(0,0,0,.6), inset 0 1px 0 var(--glass-top); }
+
+/* Dividers inside glass become light, not dark. */
+.table-wrap .table-key,
+.standings tbody td,
+.meta-line,
+.roll-row,
+.season-card-head,
+.news-banner { border-color: rgba(255,255,255,.07); }
+
+.standings thead th {
+  background: rgba(255,255,255,.055);
+  border-bottom-color: rgba(255,255,255,.10);
+}
+.table-key { background: rgba(255,255,255,.035); }
+.standings tbody tr:hover { background: rgba(255,255,255,.055); }
+
+.season-card-head { background: linear-gradient(180deg, rgba(242,179,61,.10), transparent); }
+.movement { background: rgba(255,255,255,.08); }
+.movement-col { background: rgba(10,16,32,.28); }
+
+/* Content that sat on opaque surfaces becomes translucent glass of its own. */
+.stat-box, .score, .empty code, .setup code, .setup li::before {
+  background: rgba(255,255,255,.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+}
+.setup li::before { border-color: rgba(255,255,255,.14); }
+.score--pending { background: transparent; box-shadow: none; }
+
+.avatar, .avatar-fallback {
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.acc-chevron {
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
+}
+
+/* ---- Lite glass: rows ----------------------------------------------------*/
+
+.match {
+  background: var(--glass-bg-lite);
+  border-color: rgba(255,255,255,.09);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  transition: border-color var(--fast) var(--ease), transform var(--mid) var(--spring),
+              background var(--fast) var(--ease);
+}
+.match:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.07); }
+
+/* ---- Banners and empty states: glass, but keep the semantic border ------ */
+
+.banner, .empty {
+  -webkit-backdrop-filter: var(--glass-bf);
+  backdrop-filter: var(--glass-bf);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+}
+.empty { background: rgba(255,255,255,.035); border-color: rgba(255,255,255,.16); }
+.banner--error  { background: linear-gradient(rgba(242,104,107,.16), rgba(242,104,107,.10)), rgba(20,31,53,.5); }
+.banner--notice { background: linear-gradient(rgba(242,179,61,.15), rgba(242,179,61,.09)), rgba(20,31,53,.5); }
+
+/* ---- Header: a floating capsule -----------------------------------------
+   The glass lives on ::before / ::after, not on the header itself.
+   A backdrop-filter on the header would make it the containing block for the
+   fixed mobile nav inside it (see layout.css), pinning the nav to the header
+   instead of the screen. The header's own fade is removed for the same kind
+   of reason: an opacity animation makes it a backdrop root. */
+
+.site-header {
+  background: none;
+  border-bottom: 0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  animation: none;
+}
+.site-header::before,
+.site-header::after {
+  content: "";
+  position: absolute;
+  inset: 8px max(12px, calc(50% - var(--shell) / 2));
+  border-radius: 999px;
+  pointer-events: none;
+}
+.site-header::before {
+  z-index: -1;
+  background: var(--glass-bg-bar);
+  -webkit-backdrop-filter: var(--glass-bf-bar);
+  backdrop-filter: var(--glass-bf-bar);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-top);
+}
+.site-header::after {
+  z-index: 0;
+  padding: 1px;
+  background: linear-gradient(160deg,
+    rgba(255,255,255,.6), rgba(255,255,255,.08) 28%,
+    rgba(255,255,255,.03) 62%, rgba(255,255,255,.3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+}
+
+.brand img, .brand svg { filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
+
+.season-chip {
+  border-color: var(--glass-line);
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* Navigation links: the current page is a glass pill, not an underline. */
+.main-nav a {
+  border-radius: 999px;
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease),
+              box-shadow var(--fast) var(--ease), transform var(--mid) var(--spring);
+}
+.main-nav a:hover { background: rgba(255,255,255,.08); }
+.main-nav a:active { transform: scale(.94); }
+.main-nav a[aria-current="page"] {
+  background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.08));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 0 0 1px rgba(255,255,255,.14),
+              0 4px 14px -4px rgba(0,0,0,.5);
+}
+.main-nav a[aria-current="page"]::after { display: none; }
+
+/* ---- Tabs: a glass track with a glass lens that slides ------------------ */
+
+.tabs {
+  border-color: transparent;
+  border-radius: 999px;
+  background: var(--glass-bg-bar);
+  -webkit-backdrop-filter: var(--glass-bf-bar);
+  backdrop-filter: var(--glass-bf-bar);
+  box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--glass-line), inset 0 1px 0 var(--glass-top);
+}
+.tab {
+  border-radius: 999px;
+  transition: color var(--fast) var(--ease), transform var(--mid) var(--spring);
+}
+.tab:active { transform: scale(.94); }
+.tab[aria-selected="true"] { color: var(--ink); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
+
+.tab-marker {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(242,179,61,.5), rgba(242,179,61,.22));
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent, var(--premium)) 58%, rgba(255,255,255,.1)),
+    color-mix(in srgb, var(--accent, var(--premium)) 26%, transparent));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 0 0 1px color-mix(in srgb, var(--accent, var(--premium)) 55%, rgba(255,255,255,.2)),
+    0 8px 20px -8px color-mix(in srgb, var(--accent, var(--premium)) 70%, transparent);
+  transition: transform var(--slow) var(--spring), width var(--slow) var(--spring);
+}
+
+.acc-head:active { background: rgba(255,255,255,.05); }
+
+/* ---- Mobile: a floating glass tab bar ----------------------------------- */
+
+@media (max-width: 760px) {
+  /* The capsule's curved ends need more room than the flat page gutter. */
+  .site-header .shell { padding-inline: 22px; }
+
+  .main-nav {
+    left: 12px; right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    gap: 2px;
+    padding: 6px;
+    border: 0;
+    border-radius: 30px;
+    background: var(--glass-bg-bar);
+    -webkit-backdrop-filter: var(--glass-bf-bar);
+    backdrop-filter: var(--glass-bf-bar);
+    box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--glass-line), inset 0 1px 0 var(--glass-top);
+  }
+  .main-nav a { padding: 11px 4px; }
+
+  main { padding-bottom: calc(var(--s-5) + 84px + env(safe-area-inset-bottom, 0px)); }
+  .site-footer { padding-bottom: calc(var(--s-5) + 84px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---- Refraction (Chromium only) -----------------------------------------
+   Other engines ignore url() inside backdrop-filter, so js/ui/glass.js adds
+   .glass-refract only where it works. The filter lives in each page's inline
+   <svg> (#lg-refract). It bends what is behind the bars slightly. */
+
+.glass-refract .tabs,
+.glass-refract .site-header::before {
+  -webkit-backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
+  backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
+}
+@media (max-width: 760px) {
+  .glass-refract .main-nav {
+    -webkit-backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
+    backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
+  }
+}
+
+/* ---- Scrollbars --------------------------------------------------------- */
+
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-color: transparent; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* =========================================================================
+   FALLBACKS
+   Glass is decoration. When the visitor asks for less transparency, or the
+   browser cannot blur what is behind an element, surfaces turn opaque and
+   the text keeps its contrast.
+   ========================================================================= */
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bf: none; --glass-bf-bar: none;
+    --glass-bg: var(--surface); --glass-bg-bar: var(--surface-2); --glass-bg-lite: var(--surface);
+  }
+  .ambient { display: none; }
+  .glass-refract .tabs, .glass-refract .site-header::before, .glass-refract .main-nav {
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --glass-bf: none; --glass-bf-bar: none;
+    --glass-bg: var(--surface); --glass-bg-bar: var(--surface-2); --glass-bg-lite: var(--surface);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient i:nth-child(n) { animation: none; }
+  .tab-marker { transition-duration: .01ms; }
+}

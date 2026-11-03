@@ -18,8 +18,8 @@
   /* ---- Text ------------------------------------------------------------ */
   --ink:         #E8EEFB;
   --ink-dim:     #B4C2DC;
-  --muted:       #8496B5;
-  --faint:       #5E7094;
+  --muted:       #9AA9C6;
+  --faint:       #8A9AB8;
 
   /* ---- Tier identity. These carry meaning, not decoration. ------------- */
   --premium:     #F2B33D;
@@ -75,7 +75,24 @@
   --lift-2: 0 1px 0 rgba(255,255,255,.05) inset, 0 8px 28px rgba(0,0,0,.45);
   --lift-3: 0 1px 0 rgba(255,255,255,.06) inset, 0 20px 50px rgba(0,0,0,.55);
 
+  /* ---- Liquid glass. Used by css/glass.css. ---------------------------- */
+  --glass-bg:
+    linear-gradient(145deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.035) 45%, rgba(255,255,255,.07) 100%),
+    rgba(20, 31, 53, .64);
+  --glass-bg-bar:
+    linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 100%),
+    rgba(14, 22, 40, .62);
+  --glass-bg-lite:
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.02)),
+    rgba(20, 31, 53, .46);
+  --glass-bf:      blur(22px) saturate(175%);
+  --glass-bf-bar:  blur(16px) saturate(190%);
+  --glass-line:    rgba(255,255,255,.14);
+  --glass-top:     rgba(255,255,255,.36);
+  --glass-shadow:  0 14px 34px -10px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.22);
+
   /* ---- Motion ---------------------------------------------------------- */
+  --spring:   cubic-bezier(.34, 1.4, .64, 1);
   --ease:     cubic-bezier(.25, .8, .35, 1);
   --ease-out: cubic-bezier(.16, 1, .3, 1);
   --fast: 160ms;
