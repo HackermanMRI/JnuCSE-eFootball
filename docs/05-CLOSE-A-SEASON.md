@@ -36,7 +36,7 @@ Save and refresh.
 | Tier History | a new entry appears for this season |
 | Hall of Fame | this season's figures enter the all-time records |
 
-Second Tier has no champion, by design. Its top two celebrate promotion.
+Second Tier has no league champion, by design. Its promoted players celebrate promotion. (Its rank 1 does earn a Second Tier winner star on the Players page, see `docs/08-PLAYERS-PAGE.md`.)
 
 ## Before you close, check
 

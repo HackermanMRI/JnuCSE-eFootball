@@ -287,6 +287,53 @@ tr[data-zone="relegation"]{ background: rgba(242,104,107,.045); }
 }
 .feed-status:empty { display: none; }
 
+/* ---- Search ------------------------------------------------------------- */
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+  padding: 0 var(--s-2) 0 var(--s-4);
+  min-height: 48px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  transition: border-color var(--fast) var(--ease), box-shadow var(--fast) var(--ease);
+}
+.search:focus-within {
+  border-color: var(--accent, var(--premium));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--premium)) 25%, transparent);
+}
+.search-icon { flex: none; color: var(--muted); }
+.search-input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;           /* 16px: iOS Safari zooms the page on smaller inputs */
+}
+.search-input::placeholder { color: var(--faint); }
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+.search-reset {
+  flex: none;
+  min-height: 36px;
+  padding: 0 var(--s-4);
+  border-radius: 99px;
+  background: var(--surface-3);
+  color: var(--ink);
+  font-size: var(--t-sm);
+  font-weight: 700;
+}
+.search-reset:hover { background: var(--faint); }
+
 /* ---- Accordion cards (news + players) ---------------------------------- */
 
 .acc {
@@ -422,6 +469,62 @@ tr[data-zone="relegation"]{ background: rgba(242,104,107,.045); }
 .honour.title { background: var(--premium-wash); color: var(--premium); }
 .honour.up    { background: var(--second-wash);  color: var(--second); }
 .honour.down  { background: var(--loss-wash);    color: var(--loss); }
+
+/* ---- Players page: career card ----------------------------------------- */
+
+.player-head { display: flex; align-items: center; gap: var(--s-4); }
+.player-head .avatar { width: 44px; height: 44px; }
+
+.career {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) 1fr;
+  gap: var(--s-5);
+  align-items: start;
+}
+.career-main { min-width: 0; }
+.career .player-stats { margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
+.career .meta-line .k { width: 150px; }
+.career .rec { display: block; }
+.career .rec b { color: var(--ink); font-weight: 700; }
+.career .rec small { display: block; margin-top: 2px; color: var(--faint); font-size: var(--t-xs); }
+
+/* The photo. aspect-ratio reserves its space so opening the card never jumps. */
+.portrait {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: linear-gradient(160deg, var(--surface-3), var(--surface-2));
+}
+.portrait img { width: 100%; height: 100%; object-fit: cover; }
+.portrait-fallback {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: var(--muted);
+  font-size: 4rem;
+  font-weight: 800;
+  font-variation-settings: "wdth" 118;
+}
+
+/* Trophy stars */
+.star { width: 18px; height: 18px; flex: none; }
+.star--premium { fill: var(--premium); }
+.star--second  { fill: var(--second); }
+.head-stars { display: inline-flex; align-items: center; gap: 2px; flex: none; }
+.head-stars .more { margin-left: 2px; color: var(--muted); font-size: var(--t-xs); font-weight: 700; }
+.trophies { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.trophy {
+  display: inline-flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-1) var(--s-3) var(--s-1) var(--s-2);
+  border-radius: 99px;
+  font-size: var(--t-xs);
+  color: var(--ink-dim);
+}
+.trophy b { display: block; color: var(--ink); font-size: var(--t-sm); line-height: 1.2; }
+.trophy .star { width: 22px; height: 22px; }
+.trophy--premium { background: var(--premium-wash); }
+.trophy--second  { background: var(--second-wash); }
 
 /* ---- Hall of fame ------------------------------------------------------ */
 
@@ -595,7 +698,14 @@ tr[data-zone="relegation"]{ background: rgba(242,104,107,.045); }
 
   .movement { grid-template-columns: 1fr; }
   .meta-line { flex-direction: column; gap: var(--s-1); }
-  .meta-line .k { width: auto; }
+  .meta-line .k, .career .meta-line .k { width: auto; }
+  .career { grid-template-columns: 1fr; gap: var(--s-4); }
+  .career .player-stats { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .career .stat-box { padding: var(--s-3) 2px; }
+  .career .stat-box .v { font-size: var(--t-md); }
+  .career .stat-box .k { font-size: 11px; }
+  .portrait { max-width: 300px; margin: 0 auto; }
+  .player-head { gap: var(--s-3); }
   .setup { padding: var(--s-5) var(--s-4); }
   .table-key { gap: var(--s-3); }
 

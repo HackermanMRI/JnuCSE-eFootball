@@ -7,6 +7,8 @@
 
 import { el, nameOf, avatar, signed, formRow, emptyState, pad } from "./dom.js";
 import { matchFeed } from "../core/standings.js";
+import { matchesQuery } from "../core/search.js";
+import { searchBar, noMatches } from "./search.js";
 
 /* ---- Standings ---------------------------------------------------------- */
 
@@ -114,15 +116,20 @@ function tableKey(season, tier) {
 /* ---- Matches ------------------------------------------------------------ */
 
 /**
- * Match list with infinite scroll. `batch` matches are drawn first; the rest
- * are drawn in further batches as the visitor nears the bottom, until the
- * last upcoming match (or the very first match of the season, for Recent).
- * `batch` comes from recentMatchesCount / upcomingMatchesCount in config.js.
+ * Upcoming / Recent list: a search box above an infinite-scroll feed.
+ *
+ * Scrolling: `batch` matches are drawn first and the rest follow as the
+ * visitor nears the bottom, up to the last upcoming match (or back to the
+ * very first match of the season, for Recent). `batch` comes from
+ * recentMatchesCount / upcomingMatchesCount in config.js.
+ *
+ * Search: matches where either player's name fits the query. Reset (or an
+ * empty box) brings back the full default feed.
  */
 export function renderMatches(model, season, tier, kind, batch) {
-  const feed = matchFeed(season.split[tier], kind);
+  const all = matchFeed(season.split[tier], kind);
 
-  if (!feed.length) {
+  if (!all.length) {
     return kind === "recent"
       ? emptyState("No results yet",
           "Matches appear here as soon as you enter a score. " +
@@ -132,10 +139,40 @@ export function renderMatches(model, season, tier, kind, batch) {
   }
 
   const size = Math.max(1, Number.isInteger(batch) ? batch : 10);
+  const results = el("div", { class: "feed-results" });
+  let view = null;
+
+  function show(rawQuery) {
+    view?.destroy();
+    const query = rawQuery.trim();
+    const feed = query
+      ? all.filter(fx => matchesQuery([nameOf(model, fx.a), nameOf(model, fx.b)], query))
+      : all;
+
+    if (!feed.length) {
+      view = null;
+      results.replaceChildren(noMatches(query, kind === "recent" ? "results" : "fixtures"));
+      return;
+    }
+    view = feedView(model, feed, kind, size, query);
+    results.replaceChildren(view.root);
+  }
+
+  const bar = searchBar({
+    label: kind === "recent" ? "Search results by player name" : "Search fixtures by player name",
+    onChange: show
+  });
+
+  show("");
+  return el("div", { class: "feed-panel" }, bar.root, results);
+}
+
+function feedView(model, feed, kind, size, query) {
   const noun = kind === "recent" ? "results" : "fixtures";
-  const endNote = kind === "recent"
-    ? "That was the first match of the season."
-    : "That is the last match of the season.";
+  const endNote = query
+    ? `End of the matches for “${query}”`
+    : kind === "recent" ? "That was the first match of the season." : "That is the last match of the season.";
+  const of = query ? ` for “${query}”` : "";
 
   const list = el("div", { class: "match-list" });
   const more = el("button", { class: "feed-more", type: "button" });
@@ -150,8 +187,8 @@ export function renderMatches(model, season, tier, kind, batch) {
     shown += next.length;
 
     const left = feed.length - shown;
-    status.textContent = left > 0 ? `Showing ${shown} of ${feed.length} ${noun}` : "";
     if (left > 0) {
+      status.textContent = `Showing ${shown} of ${feed.length} ${noun}${of}`;
       more.textContent = `Load ${Math.min(size, left)} more`;
     } else {
       more.remove();
@@ -177,7 +214,7 @@ export function renderMatches(model, season, tier, kind, batch) {
   const root = el("div", { class: "feed" }, list, more, status);
   drawNext();
   if (feed.length > shown) observer?.observe(more);
-  return root;
+  return { root, destroy: () => observer?.disconnect() };
 }
 
 export function matchRow(model, fx, i = 0) {

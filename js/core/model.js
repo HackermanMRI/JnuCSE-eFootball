@@ -14,6 +14,7 @@ import { TIER, STATUS } from "./rules.js";
 import { computeTable, splitFixtures, chronological, isPlayed } from "./standings.js";
 import { movementPlan, closeSeason, inheritRosters } from "./season.js";
 import { buildRecords } from "./stats.js";
+import { buildCareers } from "./careers.js";
 import * as V from "./validate.js";
 
 function playerIndex() {
@@ -149,6 +150,7 @@ export function buildModel() {
     started,
     history,
     records: buildRecords(seasons, byId, CONFIG),
+    careers: buildCareers(seasons, byId),
     report
   };
 
