@@ -19,7 +19,7 @@ Every opened card has:
 | Biggest win | The win with the largest goal margin. Tie: the one with more goals scored, then the earlier match |
 | Biggest loss | The loss with the largest goal margin. Tie: the one with more goals conceded, then the earlier match |
 | Most goals in a season | Goals scored in one season, added up over its matches. Tied seasons are all listed |
-| Best win streak | The longest run of wins in a row **inside one season**, with the season shown. A draw or a loss ends the run, and a run never carries into the next season. Tied seasons are all listed |
+| Best win streak | The longest run of wins in a row over the player's whole career. **It carries from one season into the next.** A draw or a loss ends it. It shows the season it started and ended in (for example "Seasons 1 – 2"), and "still running" while it is alive. The record only changes when a **longer** run is reached, so an equal run never replaces the earlier one |
 | Trophies | One star per trophy, with the season (see below) |
 | Photo | The large picture, from the `photo` file in `data/players.js` |
 

@@ -633,22 +633,39 @@ describe("Player careers", () => {
     eq(a.biggestWin.opponent, "z");
   });
 
-  it("win streak resets on a draw or a loss and never crosses seasons", () => {
+  it("win streak carries across seasons and a draw or loss ends it", () => {
     const s1 = season(1, true, ["a", "z"], [], [
-      fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2), fx("a", "z", 1, 1, 3), fx("a", "z", 1, 0, 4), fx("a", "z", 2, 0, 5), fx("a", "z", 3, 0, 6)
+      fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2), fx("a", "z", 1, 1, 3),   // 2 wins, then a draw
+      fx("a", "z", 1, 0, 4), fx("a", "z", 2, 0, 5), fx("a", "z", 3, 0, 6)    // 3 wins, run still alive at season end
     ], [], { champion: "z", secondTable: [] });
-    const s2 = season(2, false, ["a", "z"], [], [fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2)]);
+    const s2 = season(2, false, ["a", "z"], [], [fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2), fx("a", "z", 0, 1, 3)]);
     const a = find(buildCareers([s1, s2], byId), "a");
-    eq(a.bestWinStreak.length, 3);
-    eq(a.bestWinStreak.seasons, [{ season: 1, live: false }]);          // 2 + 2 across the seasons must NOT make 4
+    eq([a.bestWinStreak.length, a.bestWinStreak.from, a.bestWinStreak.to], [5, 1, 2]); // 3 + 2 carried over
+    eq(a.bestWinStreak.active, false);                                                 // the s2 loss ended it
+    eq(a.bestWinStreak.live, true);                                                    // it ended in a season still in progress
   });
 
-  it("tied records list every tied season, and flag a season in progress", () => {
-    const s1 = season(1, true, ["a", "z"], [], [fx("a", "z", 2, 0, 1), fx("a", "z", 1, 0, 2)], [], { champion: "z", secondTable: [] });
-    const s2 = season(2, false, ["a", "z"], [], [fx("a", "z", 3, 0, 1)]);
-    const a = find(buildCareers([s1, s2], byId), "a");
-    eq(a.mostGoalsInSeason, { goals: 3, seasons: [{ season: 1, live: false }, { season: 2, live: true }] });
-    eq(a.bestWinStreak.length, 2);
+  it("the streak record only changes for a LONGER run; an equal run keeps the earlier one", () => {
+    const s = season(1, false, ["a", "z"], [], [
+      fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2), fx("a", "z", 0, 0, 3),   // first run: 2
+      fx("a", "z", 1, 0, 4), fx("a", "z", 1, 0, 5), fx("a", "z", 0, 2, 6),   // equal run: 2, must not replace
+      fx("a", "z", 1, 0, 7), fx("a", "z", 1, 0, 8), fx("a", "z", 1, 0, 9)    // longer run: 3, still going
+    ]);
+    const a = find(buildCareers([s], byId), "a");
+    eq([a.bestWinStreak.length, a.bestWinStreak.active], [3, true]);
+    const t = season(1, false, ["a", "z"], [], [
+      fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2), fx("a", "z", 0, 0, 3), fx("a", "z", 1, 0, 4), fx("a", "z", 1, 0, 5)
+    ]);
+    const a2 = find(buildCareers([t], byId), "a");
+    eq([a2.bestWinStreak.from, a2.bestWinStreak.to, a2.bestWinStreak.active], [1, 1, false]);   // first run (rounds 1-2) kept, no longer "running"
+  });
+
+  it("a player who sits out a season does not lose his streak", () => {
+    const s1 = season(1, true, ["a", "z"], [], [fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2)], [], { champion: "z", secondTable: [] });
+    const s2 = season(2, true, ["z", "m"], [], [fx("z", "m", 1, 0, 1)], [], { champion: "z", secondTable: [] });
+    const s3 = season(3, false, ["a", "z"], [], [fx("a", "z", 1, 0, 1)]);
+    const a = find(buildCareers([s1, s2, s3], byId), "a");
+    eq([a.bestWinStreak.length, a.bestWinStreak.from, a.bestWinStreak.to], [3, 1, 3]);
   });
 
   it("trophies: Premium champion and Second Tier winner, completed seasons only", () => {

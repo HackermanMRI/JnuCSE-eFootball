@@ -13,12 +13,16 @@
      biggest loss     largest goal margin; ties go to the most goals
                       conceded, then to the earlier match
      most goals       goals scored in one season, summed over its matches
-     best win streak  longest run of consecutive wins inside ONE season,
-                      in match order. A draw or a loss ends the run, and a
-                      run never carries into the next season
+     best win streak  longest run of consecutive wins over the player's
+                      whole career, in match order. It carries from one
+                      season into the next; a draw or a loss ends it. The
+                      record only changes when a LONGER run is reached, so
+                      an equal run never replaces the earlier one. It notes
+                      the season the run started and ended in, and whether
+                      it is still going
      trophies         Premium champion and Second Tier winner of a
                       completed season
-   Where records tie, every tied season is listed.
+   Where most-goals records tie, every tied season is listed.
    ========================================================================= */
 
 import { isPlayed, chronological } from "./standings.js";
@@ -52,11 +56,11 @@ export function buildCareers(seasons, byId = new Map()) {
     if (!map.has(id)) map.set(id, blank(id));
     return map.get(id);
   };
+  const streak = new Map();     // id -> { run, start }; kept across seasons
 
   for (const s of seasons) {
     const live = !s.completed;
     const goals = new Map();      // id -> goals scored this season
-    const streak = new Map();     // id -> { run, max }
 
     for (const tier of TIERS) {
       for (const id of s.rosters[tier]) {
@@ -73,7 +77,7 @@ export function buildCareers(seasons, byId = new Map()) {
         ];
         for (const side of sides) {
           const c = get(side.id);
-          const st = streak.get(side.id) || { run: 0, max: 0 };
+          const st = streak.get(side.id) || { run: 0, start: s.number };
           streak.set(side.id, st);
 
           c.played++;
@@ -86,38 +90,34 @@ export function buildCareers(seasons, byId = new Map()) {
 
           if (side.own > side.opp) {
             c.won++;
-            st.run++;
-            st.max = Math.max(st.max, st.run);
+            if (++st.run === 1) st.start = s.number;
+            if (!c.bestWinStreak || st.run > c.bestWinStreak.length) {
+              c.bestWinStreak = { length: st.run, from: st.start, to: s.number, live, active: true };
+            }
             const cand = { margin: side.own - side.opp, for: side.own, against: side.opp, ...where };
             if (beats(cand, c.biggestWin, "for")) c.biggestWin = cand;
           } else if (side.own < side.opp) {
             c.lost++;
             st.run = 0;
+            if (c.bestWinStreak) c.bestWinStreak.active = false;
             const cand = { margin: side.opp - side.own, for: side.own, against: side.opp, ...where };
             if (beats(cand, c.biggestLoss, "against")) c.biggestLoss = cand;
           } else {
             c.drawn++;
             st.run = 0;
+            if (c.bestWinStreak) c.bestWinStreak.active = false;
           }
         }
       }
     }
 
-    /* Fold this season's goals and streak into each career. */
+    /* Fold this season's goals into each career. */
     for (const [id, total] of goals) {
       const c = get(id);
       const entry = { season: s.number, live };
       const r = c.mostGoalsInSeason;
       if (!r || total > r.goals) c.mostGoalsInSeason = { goals: total, seasons: [entry] };
       else if (total === r.goals) r.seasons.push(entry);
-    }
-    for (const [id, st] of streak) {
-      if (st.max === 0) continue;
-      const c = get(id);
-      const entry = { season: s.number, live };
-      const r = c.bestWinStreak;
-      if (!r || st.max > r.length) c.bestWinStreak = { length: st.max, seasons: [entry] };
-      else if (st.max === r.length) r.seasons.push(entry);
     }
 
     /* Trophies: completed seasons only. */

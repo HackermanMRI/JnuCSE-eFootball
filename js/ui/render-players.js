@@ -86,7 +86,7 @@ function careerCard(model, c) {
                    seasonsText(c.mostGoalsInSeason.seasons))
           : dash("Not played yet")),
         line("Best win streak", c.bestWinStreak
-          ? record(`${c.bestWinStreak.length} in a row`, seasonsText(c.bestWinStreak.seasons))
+          ? record(`${c.bestWinStreak.length} in a row`, streakText(c.bestWinStreak))
           : dash(c.played ? "No wins yet" : "Not played yet")),
         line("Trophies", trophies(c.trophies))
       )
@@ -151,6 +151,12 @@ function seasonsText(list) {
     : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
   const live = list.some(x => x.live) ? " (in progress)" : "";
   return `Season${names.length > 1 ? "s" : ""} ${joined}${live}`;
+}
+
+/** "Season 1", "Seasons 1 – 2" for a run that crossed seasons, plus its status. */
+function streakText(r) {
+  const span = r.from === r.to ? `Season ${r.from}` : `Seasons ${r.from} – ${r.to}`;
+  return span + (r.live ? " (in progress)" : "") + (r.active ? " · still running" : "");
 }
 
 const pct = n => `${Math.round(n * 10) / 10}%`;
