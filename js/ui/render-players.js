@@ -6,10 +6,11 @@
    nothing is calculated here.
    ========================================================================= */
 
-import { el, nameOf, avatar, initials, emptyState } from "./dom.js";
-import { accordion } from "./interactions.js";
+import { el, nameOf, avatar, initials, emptyState, starIcon } from "./dom.js";
+import { accordion, revealNow } from "./interactions.js";
 import { searchBar, noMatches } from "./search.js";
 import { matchesQuery } from "../core/search.js";
+import { countUp, flip, scrollToY, headerBottom } from "./motion.js";
 
 const TIER_LABEL = { premium: "Premium", second: "Second Tier" };
 const TROPHY_LABEL = { premium: "Premium champion", second: "Second Tier winner" };
@@ -18,36 +19,69 @@ export function renderPlayersPage(model) {
   const careers = model.careers;
   if (!careers.length) {
     return emptyState("No players yet",
-      "Players appear here once they are on a season roster. See <code>docs/00-FIRST-TIME-SETUP.md</code>.");
+      "Players appear here once they are on a season roster. See <code>docs/00-FIRST-TIME-SETUP.md</code>.",
+      "users");
   }
 
-  const items = careers.map(c => ({
-    name: nameOf(model, c.id),
-    node: el("div", { class: "reveal" }, careerCard(model, c))
-  }));
+  const items = careers.map(c => {
+    const card = careerCard(model, c);
+    return {
+      id: c.id,
+      name: nameOf(model, c.id),
+      card,
+      node: el("div", { class: "reveal", id: `player-${c.id}` }, card)
+    };
+  });
 
   const list = el("div", { class: "news-list" }, items.map(i => i.node));
   const note = el("p", { class: "feed-status", role: "status" });
   const none = el("div", { hidden: "" });
 
-  /* Cards are hidden, not rebuilt, so an open card stays open while typing. */
+  /* Cards are hidden, not rebuilt, so an open card stays open while typing.
+     The cards that remain glide into their new places (FLIP) rather than
+     jumping, and cards coming back fade in. */
   const bar = searchBar({
     label: "Search players by name",
     onChange: query => {
       let shown = 0;
-      for (const item of items) {
-        const hit = matchesQuery(item.name, query);
-        item.node.hidden = !hit;
-        if (hit) shown++;
-      }
-      const searching = query.trim() !== "";
-      note.textContent = searching && shown ? `${shown} of ${items.length} players` : "";
-      none.hidden = shown > 0;
-      if (!shown) none.replaceChildren(noMatches(query, "players"));
+      flip(items.map(i => i.node), () => {
+        for (const item of items) {
+          const hit = matchesQuery(item.name, query);
+          item.node.hidden = !hit;
+          if (hit) shown++;
+        }
+        const searching = query.trim() !== "";
+        note.textContent = searching && shown ? `${shown} of ${items.length} players` : "";
+        none.hidden = shown > 0;
+        if (!shown) none.replaceChildren(noMatches(query, "players"));
+      });
     }
   });
 
-  return el("div", {}, bar.root, note, none, list);
+  const root = el("div", {}, bar.root, note, none, list);
+
+  /* players.html#player-sun opens and scrolls to that card (the points
+     tables link here). Called by app.js once the page is mounted. */
+  root.openFromHash = () => {
+    const m = location.hash.match(/^#player-([\w-]+)$/);
+    const item = m && items.find(i => i.id === m[1]);
+    if (!item) return;
+    revealNow(item.node);
+    item.card.openCard({ reveal: false });
+    requestAnimationFrame(() => {
+      /* Layout position, not getBoundingClientRect: the card may still be
+         mid-reveal, and its transform would throw the target off. */
+      let top = 0;
+      for (let n = item.node; n; n = n.offsetParent) top += n.offsetTop;
+      scrollToY(top - headerBottom() - 16);
+      item.card.classList.remove("is-target");
+      void item.card.offsetWidth;            /* restart the pulse */
+      item.card.classList.add("is-target");
+    });
+  };
+  addEventListener("hashchange", root.openFromHash);
+
+  return root;
 }
 
 /* ---- One player ---------------------------------------------------------- */
@@ -68,9 +102,10 @@ function careerCard(model, c) {
     headStars(c.trophies)
   );
 
-  const body = el("div", { class: "career" },
+  /* Built on first open (see accordion in interactions.js). */
+  const body = () => el("div", { class: "career-wrap" }, el("div", { class: "career" },
     portrait(model, c.id, name),
-    el("div", { class: "career-main" },
+    el("div", { class: "career-main", style: { "--k": 1 } },
       el("div", { class: "player-stats" },
         stat(c.played, "Played"),
         stat(c.won, "Won"),
@@ -91,9 +126,13 @@ function careerCard(model, c) {
         line("Trophies", trophies(c.trophies))
       )
     )
-  );
+  ));
 
-  return accordion({ head, body });
+  /* The numbers count up the first time the card opens. */
+  return accordion({
+    head, body,
+    onFirstOpen: card => card.querySelectorAll(".stat-box .v").forEach(v => countUp(v))
+  });
 }
 
 /* ---- Pieces -------------------------------------------------------------- */
@@ -163,18 +202,6 @@ const pct = n => `${Math.round(n * 10) / 10}%`;
 
 /* ---- Trophies ------------------------------------------------------------ */
 
-function star(tier) {
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("class", `star star--${tier}`);
-  const path = document.createElementNS(ns, "path");
-  path.setAttribute("d", "M12 2.6l2.95 6.02 6.65.88-4.84 4.62 1.2 6.6L12 17.5l-5.96 3.22 1.2-6.6L2.4 9.5l6.65-.88L12 2.6z");
-  svg.append(path);
-  return svg;
-}
-
 /** Compact stars in the collapsed card: one per trophy. */
 function headStars(list) {
   if (!list.length) return null;
@@ -183,7 +210,11 @@ function headStars(list) {
     class: "head-stars", role: "img",
     "aria-label": `${list.length} ${list.length === 1 ? "trophy" : "trophies"}`
   },
-    list.slice(0, MAX).map(t => star(t.tier)),
+    list.slice(0, MAX).map((t, i) => {
+      const s = starIcon(t.tier);
+      s.style.setProperty("--s", i);
+      return s;
+    }),
     list.length > MAX && el("span", { class: "more" }, `+${list.length - MAX}`)
   );
 }
@@ -192,8 +223,8 @@ function headStars(list) {
 function trophies(list) {
   if (!list.length) return dash("No trophies yet");
   return el("ul", { class: "trophies" },
-    list.map(t => el("li", { class: `trophy trophy--${t.tier}` },
-      star(t.tier),
+    list.map(t => el("li", { class: `trophy-chip trophy-chip--${t.tier}` },
+      starIcon(t.tier),
       el("span", {}, el("b", {}, `Season ${t.season}`), TROPHY_LABEL[t.tier])
     ))
   );

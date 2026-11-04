@@ -1,28 +1,35 @@
 /* =========================================================================
-   LIQUID GLASS
+   LIQUID GLASS  —  the floating control layer
    =========================================================================
-   A visual layer on top of components.css. Remove the <link> to this file
-   and the site falls back to its flat look; nothing else depends on it.
-
-   Three kinds of surface:
-     bar    floating capsules (header, mobile nav, tabs, season chip)
-     panel  large cards that get real backdrop blur + a rim light that
-            follows the pointer (tables, accordions, records, setup)
-     lite   small repeated things (match rows, stat boxes). Translucent
-            only: a backdrop-filter inside another backdrop-filter does
-            not see the page, and ~150 blurred rows would be slow anyway.
-
-   All colours, blur and tint come from the --glass-* tokens in tokens.css.
+   Following Apple's Liquid Glass rules:
+     · Glass is only for controls that float above the content: the header
+       capsule, the mobile tab bar, the sticky segmented tabs and the
+       back-to-top button. Cards, tables and rows are content and stay
+       solid (components.css).
+     · Never glass on glass. Things that sit ON a bar (nav pills, the
+       selection lens, the season chip) are fills and bright labels, not a
+       second blurred layer. On the web this is also a correctness rule: a
+       backdrop-filter parent is a Backdrop Root, so nested glass would only
+       see its parent, not the page.
+     · Regular variant only, untinted. Colour lives in the content.
+     · Light blur plus edge refraction. The refraction (Chromium only) is a
+       displacement map built per element by js/ui/glass.js.
+     · Accessibility settings win: reduced transparency, increased
+       contrast, forced colours and reduced motion all have fallbacks below.
+   Shapes and a plain solid fill for every bar are in layout.css, so removing
+   the <link> to this file leaves working, flat bars.
    ========================================================================= */
 
-/* ---- Ambient background -------------------------------------------------
+/* ---- Backdrop -----------------------------------------------------------
    Glass only reads as glass if there is colour behind it to bend. Four soft
-   pools of light drift slowly; the second one takes the tier accent. */
+   pools of light drift slowly; the second takes the page tint. The shared
+   negative delay (set in each page's <head>) keeps them continuous from one
+   page to the next instead of restarting. */
 
 .ambient {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: var(--z-ambient);
   overflow: hidden;
   pointer-events: none;
   contain: strict;
@@ -32,17 +39,17 @@
   display: block;
   border-radius: 50%;
   will-change: transform;
+  animation-delay: var(--ambient-t, 0s) !important;
 }
 .ambient i:nth-child(1) {
   width: 62vmax; height: 62vmax; left: -18vmax; top: -24vmax;
-  background: radial-gradient(closest-side, rgba(63,122,200,.30), transparent);
+  background: radial-gradient(closest-side, rgba(63,122,200,.32), transparent);
   animation: drift-a 34s ease-in-out infinite alternate;
 }
 .ambient i:nth-child(2) {
-  width: 52vmax; height: 52vmax; right: -20vmax; top: 6vh;
-  background: radial-gradient(closest-side, rgba(242,179,61,.20), transparent);
-  background: radial-gradient(closest-side,
-    color-mix(in srgb, var(--accent, var(--premium)) 26%, transparent), transparent);
+  width: 52vmax; height: 52vmax; right: -20vmax; top: 4vh;
+  background: radial-gradient(closest-side, rgba(242,179,61,.22), transparent);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--tint) 28%, transparent), transparent);
   animation: drift-b 41s ease-in-out infinite alternate;
 }
 .ambient i:nth-child(3) {
@@ -59,46 +66,85 @@
 @keyframes drift-b { to { transform: translate3d(-8vmax, 10vmax, 0) scale(.94); } }
 @keyframes drift-c { to { transform: translate3d(11vmax, -6vmax, 0) scale(1.1); } }
 
-/* ---- Shared glass surfaces (panels) -------------------------------------
-   `border-color: transparent` hands the edge to the rim light below. */
+/* ---- The regular glass recipe -------------------------------------------
+   Tint + sheen, a light blur, a soft shadow (a legibility tool, not
+   decoration), and an inner specular line along the top edge. */
 
-.table-wrap, .acc, .record, .season-card, .setup {
-  position: relative;
-  isolation: isolate;
-  border-color: transparent;
+.site-header::before,
+.tabs,
+.to-top {
   background: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-bf);
-  backdrop-filter: var(--glass-bf);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-top);
-  transition:
-    transform var(--mid) var(--spring),
-    box-shadow var(--mid) var(--ease),
-    background var(--mid) var(--ease);
+  -webkit-backdrop-filter: var(--glass-filter);
+          backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-shadow), var(--glass-inner);
 }
 
-/* Rim light: a 1px ring, bright at the top-left and bottom-right where a
-   curved glass edge catches light, faint in between. Drawn with a masked
-   gradient so the glass itself stays transparent. */
-.table-wrap::after, .acc::after, .record::after, .season-card::after, .setup::after {
+/* Rim light: a 1px ring, bright where a curved edge catches the light
+   (top-left and bottom-right, one light direction for all chrome). Drawn
+   with a masked gradient so the glass itself stays clear. */
+.site-header::after,
+.to-top::after {
   content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+  z-index: 0;
   padding: 1px;
-  border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(140deg,
-    rgba(255,255,255,.55), rgba(255,255,255,.07) 30%,
-    rgba(255,255,255,.02) 58%, rgba(255,255,255,.26));
+  background: var(--glass-rim);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
           mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
           mask-composite: exclude;
 }
+/* Geometry only for the button: the header capsule's shape is set in
+   layout.css, and must not be overridden here. */
+.to-top::after { position: absolute; inset: 0; border-radius: inherit; }
 
-/* Pointer light: a soft specular pool that tracks the cursor (js/ui/glass.js
-   sets --mx / --my). z-index -1 puts it above the glass but under content. */
-.table-wrap::before, .acc::before, .record::before, .season-card::before, .setup::before {
+/* ---- Header capsule (its shape is in layout.css) ----------------------- */
+
+/* Once content runs underneath, the bar lifts a little further off it. */
+html.is-scrolled .site-header::before {
+  box-shadow: 0 18px 44px -14px rgba(0,0,0,.75), 0 2px 8px -2px rgba(0,0,0,.4), var(--glass-inner);
+}
+
+/* Things that sit on the header glass: fills and bright labels. */
+.season-chip {
+  background: rgba(255,255,255,.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), inset 0 1px 0 rgba(255,255,255,.14);
+}
+.brand img, .brand svg { filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+
+.nav-lens {
+  background: var(--lens-fill);
+  box-shadow: var(--lens-edge);
+}
+
+/* ---- Segmented tabs ------------------------------------------------------
+   No pseudo-element rim here: the track can scroll sideways on a narrow
+   phone, and a pseudo ring would scroll with it. Inset shadows stay put. */
+
+.tabs {
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,.26),
+              inset 0 0 0 1px rgba(255,255,255,.1);
+}
+
+/* The lens on the glass: a brighter fill with its own specular edge and a
+   faint glow of the page tint. A fill, not a second glass layer. */
+.tab-marker {
+  background: var(--lens-fill);
+  box-shadow: var(--lens-edge),
+              0 6px 18px -8px color-mix(in srgb, var(--tint) 75%, transparent),
+              inset 0 0 0 1px color-mix(in srgb, var(--tint) 30%, transparent);
+}
+
+/* ---- Back to top --------------------------------------------------------- */
+
+.to-top { overflow: hidden; }
+
+/* ---- Interactive response ------------------------------------------------
+   Glass controls answer a press: they swell slightly on a spring and a
+   light blooms from the touch point (js/ui/glass.js sets --px / --py). */
+
+.gi { position: relative; }
+.gi::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -106,291 +152,125 @@
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%),
-    rgba(255,255,255,.13), transparent 62%);
-  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%),
-    color-mix(in srgb, var(--accent, #9db7ff) 24%, rgba(255,255,255,.10)), transparent 62%);
-  transition: opacity var(--mid) var(--ease);
+  background: radial-gradient(circle at var(--px, 50%) var(--py, 50%),
+    rgba(255,255,255,.34), rgba(255,255,255,.08) 38%, transparent 70%);
+  transition: opacity var(--dur-slow) var(--ease-out);
 }
-@media (hover: hover) and (pointer: fine) {
-  .table-wrap:hover::before, .acc:hover::before, .record:hover::before,
-  .season-card:hover::before, .setup:hover::before { opacity: 1; }
-  .record:hover, .season-card:hover { transform: translateY(-2px); }
-}
-.acc.is-open { box-shadow: var(--glass-shadow), 0 24px 50px -16px rgba(0,0,0,.6), inset 0 1px 0 var(--glass-top); }
+.gi.is-pressed::before { opacity: 1; transition-duration: var(--dur-instant); }
+.gi.is-pressed { transform: scale(1.06); }
+.tab.gi.is-pressed { transform: scale(1.04); }
+.to-top.gi::before { z-index: 1; }
 
-/* Dividers inside glass become light, not dark. */
-.table-wrap .table-key,
-.standings tbody td,
-.meta-line,
-.roll-row,
-.season-card-head,
-.news-banner { border-color: rgba(255,255,255,.07); }
+/* ---- Scroll edge effect material ------------------------------------------ */
 
-.standings thead th {
-  background: rgba(255,255,255,.055);
-  border-bottom-color: rgba(255,255,255,.10);
-}
-.table-key { background: rgba(255,255,255,.035); }
-.standings tbody tr:hover { background: rgba(255,255,255,.055); }
-
-.season-card-head { background: linear-gradient(180deg, rgba(242,179,61,.10), transparent); }
-.movement { background: rgba(255,255,255,.08); }
-.movement-col { background: rgba(10,16,32,.28); }
-
-/* Content that sat on opaque surfaces becomes translucent glass of its own. */
-.stat-box, .score, .empty code, .setup code, .setup li::before {
-  background: rgba(255,255,255,.07);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
-}
-.setup li::before { border-color: rgba(255,255,255,.14); }
-.score--pending { background: transparent; box-shadow: none; }
-
-.avatar, .avatar-fallback {
-  border-color: rgba(255,255,255,.22);
-  box-shadow: 0 0 0 1px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.3);
-}
-.acc-chevron {
-  background: rgba(255,255,255,.07);
-  border-color: rgba(255,255,255,.16);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
+.edge {
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
 }
 
-/* ---- Lite glass: rows ----------------------------------------------------*/
-
-.match {
-  background: var(--glass-bg-lite);
-  border-color: rgba(255,255,255,.09);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
-  transition: border-color var(--fast) var(--ease), transform var(--mid) var(--spring),
-              background var(--fast) var(--ease);
-}
-.match:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.07); }
-
-.feed-more {
-  border-color: var(--glass-line);
-  background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.05)), rgba(14,22,40,.5);
-  -webkit-backdrop-filter: var(--glass-bf-bar);
-  backdrop-filter: var(--glass-bf-bar);
-  box-shadow: inset 0 1px 0 var(--glass-top), 0 6px 18px -8px rgba(0,0,0,.5);
-  transition: transform var(--mid) var(--spring), color var(--fast) var(--ease);
-}
-.feed-more:active { transform: scale(.95); }
-
-/* ---- Search field: a glass pill ----------------------------------------- */
-
-.search {
-  border-color: transparent;
-  background: var(--glass-bg-bar);
-  -webkit-backdrop-filter: var(--glass-bf-bar);
-  backdrop-filter: var(--glass-bf-bar);
-  box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--glass-line), inset 0 1px 0 var(--glass-top);
-}
-.search:focus-within {
-  box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--accent, var(--premium)),
-              0 0 0 3px color-mix(in srgb, var(--accent, var(--premium)) 25%, transparent);
-}
-.search-reset {
-  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
-  transition: transform var(--mid) var(--spring);
-}
-.search-reset:hover { background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.12)); }
-.search-reset:active { transform: scale(.94); }
-
-/* Player photo and trophy stars */
-.portrait {
-  box-shadow: 0 10px 28px -10px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.14);
-}
-.portrait::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,.16), transparent 28%);
-}
-.star--premium { filter: drop-shadow(0 0 6px rgba(242,179,61,.55)); }
-.star--second  { filter: drop-shadow(0 0 6px rgba(63,200,190,.5)); }
-.trophy {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 0 1px rgba(255,255,255,.08);
-}
-
-/* ---- Banners and empty states: glass, but keep the semantic border ------ */
-
-.banner, .empty {
-  -webkit-backdrop-filter: var(--glass-bf);
-  backdrop-filter: var(--glass-bf);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
-}
-.empty { background: rgba(255,255,255,.035); border-color: rgba(255,255,255,.16); }
-.banner--error  { background: linear-gradient(rgba(242,104,107,.16), rgba(242,104,107,.10)), rgba(20,31,53,.5); }
-.banner--notice { background: linear-gradient(rgba(242,179,61,.15), rgba(242,179,61,.09)), rgba(20,31,53,.5); }
-
-/* ---- Header: a floating capsule -----------------------------------------
-   The glass lives on ::before / ::after, not on the header itself.
-   A backdrop-filter on the header would make it the containing block for the
-   fixed mobile nav inside it (see layout.css), pinning the nav to the header
-   instead of the screen. The header's own fade is removed for the same kind
-   of reason: an opacity animation makes it a backdrop root. */
-
-.site-header {
-  background: none;
-  border-bottom: 0;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  animation: none;
-}
-.site-header::before,
-.site-header::after {
-  content: "";
-  position: absolute;
-  inset: 8px max(12px, calc(50% - var(--shell) / 2));
-  border-radius: 999px;
-  pointer-events: none;
-}
-.site-header::before {
-  z-index: -1;
-  background: var(--glass-bg-bar);
-  -webkit-backdrop-filter: var(--glass-bf-bar);
-  backdrop-filter: var(--glass-bf-bar);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-top);
-}
-.site-header::after {
-  z-index: 0;
-  padding: 1px;
-  background: linear-gradient(160deg,
-    rgba(255,255,255,.6), rgba(255,255,255,.08) 28%,
-    rgba(255,255,255,.03) 62%, rgba(255,255,255,.3));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-          mask-composite: exclude;
-}
-
-.brand img, .brand svg { filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
-
-.season-chip {
-  border-color: var(--glass-line);
-  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.3);
-}
-
-/* Navigation links: the current page is a glass pill, not an underline. */
-.main-nav a {
-  border-radius: 999px;
-  transition: color var(--fast) var(--ease), background var(--fast) var(--ease),
-              box-shadow var(--fast) var(--ease), transform var(--mid) var(--spring);
-}
-.main-nav a:hover { background: rgba(255,255,255,.08); }
-.main-nav a:active { transform: scale(.94); }
-.main-nav a[aria-current="page"] {
-  background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.08));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 0 0 1px rgba(255,255,255,.14),
-              0 4px 14px -4px rgba(0,0,0,.5);
-}
-.main-nav a[aria-current="page"]::after { display: none; }
-
-/* ---- Tabs: a glass track with a glass lens that slides ------------------ */
-
-.tabs {
-  border-color: transparent;
-  border-radius: 999px;
-  background: var(--glass-bg-bar);
-  -webkit-backdrop-filter: var(--glass-bf-bar);
-  backdrop-filter: var(--glass-bf-bar);
-  box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--glass-line), inset 0 1px 0 var(--glass-top);
-}
-.tab {
-  border-radius: 999px;
-  transition: color var(--fast) var(--ease), transform var(--mid) var(--spring);
-}
-.tab:active { transform: scale(.94); }
-.tab[aria-selected="true"] { color: var(--ink); text-shadow: 0 1px 8px rgba(0,0,0,.35); }
-
-.tab-marker {
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(242,179,61,.5), rgba(242,179,61,.22));
-  background: linear-gradient(180deg,
-    color-mix(in srgb, var(--accent, var(--premium)) 58%, rgba(255,255,255,.1)),
-    color-mix(in srgb, var(--accent, var(--premium)) 26%, transparent));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.55),
-    inset 0 0 0 1px color-mix(in srgb, var(--accent, var(--premium)) 55%, rgba(255,255,255,.2)),
-    0 8px 20px -8px color-mix(in srgb, var(--accent, var(--premium)) 70%, transparent);
-  transition: transform var(--slow) var(--spring), width var(--slow) var(--spring);
-}
-
-.acc-head:active { background: rgba(255,255,255,.05); }
-
-/* ---- Mobile: a floating glass tab bar ----------------------------------- */
+/* ---- Mobile: the floating tab bar is glass ------------------------------- */
 
 @media (max-width: 760px) {
-  /* The capsule's curved ends need more room than the flat page gutter. */
-  .site-header .shell { padding-inline: 22px; }
-
   .main-nav {
-    left: 12px; right: 12px;
-    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    gap: 2px;
-    padding: 6px;
-    border: 0;
-    border-radius: 30px;
-    background: var(--glass-bg-bar);
-    -webkit-backdrop-filter: var(--glass-bf-bar);
-    backdrop-filter: var(--glass-bf-bar);
-    box-shadow: var(--glass-shadow), inset 0 0 0 1px var(--glass-line), inset 0 1px 0 var(--glass-top);
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-filter);
+            backdrop-filter: var(--glass-filter);
+    box-shadow: var(--glass-shadow), var(--glass-inner);
   }
-  .main-nav a { padding: 11px 4px; }
-
-  main { padding-bottom: calc(var(--s-5) + 84px + env(safe-area-inset-bottom, 0px)); }
-  .site-footer { padding-bottom: calc(var(--s-5) + 84px + env(safe-area-inset-bottom, 0px)); }
+  .main-nav::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: var(--glass-rim);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+  }
+  /* The selected item's lens carries a hint of the page tint. */
+  .main-nav .nav-lens {
+    box-shadow: var(--lens-edge), inset 0 0 0 1px color-mix(in srgb, var(--tint) 28%, transparent);
+  }
 }
 
-/* ---- Refraction (Chromium only) -----------------------------------------
-   Other engines ignore url() inside backdrop-filter, so js/ui/glass.js adds
-   .glass-refract only where it works. The filter lives in each page's inline
-   <svg> (#lg-refract). It bends what is behind the bars slightly. */
+/* ---- Refraction (Chromium only) -------------------------------------------
+   js/ui/glass.js builds an edge-lens displacement map for each bar and sets
+   --lg-url on it. The centre stays undistorted; the background bends at the
+   rim, which is what makes it liquid glass rather than frosted glass. */
 
+.glass-refract .site-header::before,
 .glass-refract .tabs,
-.glass-refract .site-header::before {
-  -webkit-backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
-  backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
+.glass-refract .to-top {
+  -webkit-backdrop-filter: var(--lg-url,) var(--glass-filter);
+          backdrop-filter: var(--lg-url,) var(--glass-filter);
 }
 @media (max-width: 760px) {
   .glass-refract .main-nav {
-    -webkit-backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
-    backdrop-filter: url(#lg-refract) blur(10px) saturate(190%);
+    -webkit-backdrop-filter: var(--lg-url,) var(--glass-filter);
+            backdrop-filter: var(--lg-url,) var(--glass-filter);
   }
 }
-
-/* ---- Scrollbars --------------------------------------------------------- */
-
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-color: transparent; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.3); }
-::-webkit-scrollbar-track { background: transparent; }
 
 /* =========================================================================
    FALLBACKS
-   Glass is decoration. When the visitor asks for less transparency, or the
-   browser cannot blur what is behind an element, surfaces turn opaque and
-   the text keeps its contrast.
    ========================================================================= */
 
-@media (prefers-reduced-transparency: reduce) {
-  :root {
-    --glass-bf: none; --glass-bf-bar: none;
-    --glass-bg: var(--surface); --glass-bg-bar: var(--surface-2); --glass-bg-lite: var(--surface);
-  }
-  .ambient { display: none; }
-  .glass-refract .tabs, .glass-refract .site-header::before, .glass-refract .main-nav {
-    -webkit-backdrop-filter: none; backdrop-filter: none;
-  }
+/* Reduce transparency (OS setting, or the switch in the footer, which the
+   <head> script turns into this attribute): frosted becomes solid. */
+[data-transparency="reduced"] {
+  --glass-tint: #16213A;
+  --glass-sheen: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  --glass-filter: none;
 }
+[data-transparency="reduced"] .ambient { display: none; }
+[data-transparency="reduced"] .edge {
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+}
+[data-transparency="reduced"] .site-header::before,
+[data-transparency="reduced"] .tabs,
+[data-transparency="reduced"] .to-top,
+[data-transparency="reduced"] .main-nav {
+  -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+}
+
+/* No backdrop-filter at all (old browsers): solid bars, same contrast. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root {
-    --glass-bf: none; --glass-bf-bar: none;
-    --glass-bg: var(--surface); --glass-bg-bar: var(--surface-2); --glass-bg-lite: var(--surface);
+    --glass-tint: #16213A;
+    --glass-sheen: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
   }
+}
+
+/* Increase contrast: near-black bars, white labels, a visible border. */
+@media (prefers-contrast: more) {
+  :root {
+    --glass-tint: rgba(5, 9, 18, .94);
+    --on-glass-dim: #E6ECF8;
+    --card-line: rgba(255,255,255,.28);
+    --muted: #C9D3E6;
+    --faint: #B5C1D8;
+  }
+  .site-header::after, .main-nav::after, .to-top::after { background: rgba(255,255,255,.7); }
+  .tabs { box-shadow: inset 0 0 0 1px rgba(255,255,255,.7); }
+  .nav-lens, .tab-marker { box-shadow: inset 0 0 0 2px #fff; }
+}
+
+/* Windows high contrast: the system draws everything; give bars borders. */
+@media (forced-colors: active) {
+  .site-header::before, .tabs, .to-top, .main-nav {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+  .nav-lens, .tab-marker { border: 2px solid Highlight; background: Canvas; }
+  .ambient, .edge { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ambient i:nth-child(n) { animation: none; }
-  .tab-marker { transition-duration: .01ms; }
+  .gi.is-pressed, .tab.gi.is-pressed { transform: none; }
 }

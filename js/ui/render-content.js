@@ -2,24 +2,26 @@
    RENDER: NEWS, HISTORY, RECORDS
    ========================================================================= */
 
-import { el, nameOf, avatar, signed, richText, formatDate, emptyState } from "./dom.js";
+import { el, nameOf, avatar, signed, richText, formatDate, emptyState, starIcon } from "./dom.js";
 import { accordion } from "./interactions.js";
+import { countUp, whenVisible } from "./motion.js";
 
 export function renderNews(model) {
   if (!model.news.length) {
     return emptyState(
       "No news yet",
       "Posts appear here as soon as you add them. " +
-      "See <code>docs/03-POST-NEWS.md</code> for the format."
+      "See <code>docs/03-POST-NEWS.md</code> for the format.",
+      "news"
     );
   }
 
   return el("div", { class: "news-list" },
-    model.news.map(item => el("article", { class: "reveal" }, newsCard(item)))
+    model.news.map((item, i) => el("article", { class: "reveal" }, newsCard(item, i === 0)))
   );
 }
 
-function newsCard(item) {
+function newsCard(item, first) {
   const head = el("div", { class: "grow", style: { display: "flex", alignItems: "center", gap: "var(--s-3)" } },
     el("div", { class: "grow" },
       el("div", { style: { display: "flex", alignItems: "center", gap: "var(--s-2)", marginBottom: "2px" } },
@@ -35,11 +37,20 @@ function newsCard(item) {
   const card = accordion({ head, body, tier: "premium" });
 
   if (item.banner) {
+    /* The first banner is the largest thing on the News page: load it at
+       once. The rest wait until they are near the screen. Each one fades
+       in from a soft blur instead of popping in. */
     const img = el("img", {
-      class: "news-banner", src: item.banner, alt: "", loading: "lazy"
+      class: "news-banner is-loading", alt: "", decoding: "async",
+      loading: first ? "eager" : "lazy",
+      fetchpriority: first ? "high" : null
     });
-    img.addEventListener("error", () => img.remove());
-    card.prepend(img);
+    const media = el("div", { class: "news-media" }, img);
+    img.addEventListener("load", () => img.classList.remove("is-loading"), { once: true });
+    img.addEventListener("error", () => media.remove(), { once: true });
+    img.src = item.banner;
+    if (img.complete && img.naturalWidth) img.classList.remove("is-loading");
+    card.prepend(media);
   }
   return card;
 }
@@ -51,7 +62,8 @@ export function renderHistory(model) {
     return emptyState(
       "No seasons completed yet",
       "When a season is marked complete, its champion, the two players relegated " +
-      "and the two promoted are recorded here permanently."
+      "and the two promoted are recorded here permanently.",
+      "trophy"
     );
   }
 
@@ -99,7 +111,8 @@ export function renderHallOfFame(model) {
     return emptyState(
       "The record books are empty",
       "Records are written when a season is completed. Champions, points, goals " +
-      "and clean defences all appear here after Season 1 closes."
+      "and clean defences all appear here after Season 1 closes.",
+      "trophy"
     );
   }
 
@@ -112,17 +125,19 @@ export function renderHallOfFame(model) {
     titlesCard(r, model)
   ].filter(Boolean);
 
+  /* The record numbers count up the first time the grid is seen. */
+  const grid = el("div", { class: "record-grid reveal" }, cards);
+  whenVisible(grid, () => grid.querySelectorAll(".record .v").forEach(v => countUp(v)));
+
   return el("div", {},
-    el("div", { class: "record-grid reveal" }, cards),
-    el("h3", {
-      style: { margin: "var(--s-6) 0 var(--s-3)", fontSize: "var(--t-md)" }
-    }, "Roll of honour"),
+    grid,
+    el("h3", { class: "section-title" }, "Roll of honour"),
     el("div", { class: "table-wrap reveal" },
       el("div", { class: "roll" },
         model.records.champions.slice().reverse().map(c =>
           el("div", { class: "roll-row" },
             el("span", { class: "season-no" }, `Season ${c.season}`),
-            el("span", { class: "trophy" }, "★"),
+            starIcon("premium"),
             avatar(model, c.id),
             el("span", { class: "name" }, nameOf(model, c.id))
           )

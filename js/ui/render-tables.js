@@ -9,6 +9,7 @@ import { el, nameOf, avatar, signed, formRow, emptyState, pad } from "./dom.js";
 import { matchFeed } from "../core/standings.js";
 import { matchesQuery } from "../core/search.js";
 import { searchBar, noMatches } from "./search.js";
+import { revealRows, forgetRows } from "./motion.js";
 
 /* ---- Standings ---------------------------------------------------------- */
 
@@ -37,7 +38,8 @@ export function renderStandings(model, season, tier) {
     return emptyState(
       "No players in this tier yet",
       `Add player ids to the <code>${tier}</code> list in ` +
-      `<code>data/seasons/season-${pad(season.number)}/season.js</code>.`
+      `<code>data/seasons/season-${pad(season.number)}/season.js</code>.`,
+      "users"
     );
   }
 
@@ -48,7 +50,7 @@ export function renderStandings(model, season, tier) {
     el("th", { scope: "col" }, "Player"),
     COLS.map(c => el("th", { scope: "col", title: c.title, "data-slim": c.slim ? "1" : "0" }, c.label)),
     el("th", { scope: "col", class: "pts-col", title: "Points" }, "Pts"),
-    el("th", { scope: "col", title: "Last five results, oldest first" }, "Form")
+    el("th", { scope: "col", class: "form-col", title: "Last five results, oldest first" }, "Form")
   );
 
   const body = rows.map((r, i) => el("tr", {
@@ -57,7 +59,12 @@ export function renderStandings(model, season, tier) {
   },
     el("td", { class: "c-rank num" }, String(r.rank)),
     el("td", { class: "c-player" },
-      el("div", { class: "player-cell" }, avatar(model, r.id), el("span", { class: "name" }, nameOf(model, r.id)))
+      el("div", { class: "player-cell" },
+        el("a", { class: "player-link", href: `players.html#player-${r.id}`, title: "Open career card" },
+          avatar(model, r.id),
+          el("span", { class: "name" }, nameOf(model, r.id))
+        )
+      )
     ),
     COLS.map(c => el("td", {
       "data-slim": c.slim ? "1" : "0",
@@ -133,9 +140,9 @@ export function renderMatches(model, season, tier, kind, batch) {
     return kind === "recent"
       ? emptyState("No results yet",
           "Matches appear here as soon as you enter a score. " +
-          "See <code>docs/02-ENTER-MATCH-RESULTS.md</code>.")
+          "See <code>docs/02-ENTER-MATCH-RESULTS.md</code>.", "calendar")
       : emptyState("No matches left",
-          "Every fixture in this tier has a result. The season is ready to close.");
+          "Every fixture in this tier has a result. The season is ready to close.", "check");
   }
 
   const size = Math.max(1, Number.isInteger(batch) ? batch : 10);
@@ -158,9 +165,16 @@ export function renderMatches(model, season, tier, kind, batch) {
     results.replaceChildren(view.root);
   }
 
+  /* Typing is coalesced: the list is rebuilt once the visitor pauses, not
+     on every key. Reset (an empty box) is instant. */
+  let pending = 0;
   const bar = searchBar({
     label: kind === "recent" ? "Search results by player name" : "Search fixtures by player name",
-    onChange: show
+    onChange: q => {
+      clearTimeout(pending);
+      if (!q.trim()) show("");
+      else pending = setTimeout(() => show(q), 120);
+    }
   });
 
   show("");
@@ -175,21 +189,26 @@ function feedView(model, feed, kind, size, query) {
   const of = query ? ` for “${query}”` : "";
 
   const list = el("div", { class: "match-list" });
-  const more = el("button", { class: "feed-more", type: "button" });
+  const label = el("span", {});
+  const more = el("button", { class: "feed-more", type: "button" }, label, chevronDown());
   const status = el("p", { class: "feed-status", role: "status" });
+  const rows = [];
   let shown = 0;
 
-  /* Draw the next batch. Row delays restart at 0 each time so a late batch
-     does not wait behind a long stagger. */
+  /* Draw the next batch in one DOM write. Each row then plays in when it is
+     actually seen (motion.js), so a batch drawn below the fold still
+     arrives with a stagger instead of having animated off screen. */
   function drawNext() {
-    const next = feed.slice(shown, shown + size);
-    list.append(...next.map((fx, i) => matchRow(model, fx, i)));
+    const next = feed.slice(shown, shown + size).map(fx => matchRow(model, fx));
+    list.append(...next);
+    rows.push(...next);
+    revealRows(next);
     shown += next.length;
 
     const left = feed.length - shown;
     if (left > 0) {
       status.textContent = `Showing ${shown} of ${feed.length} ${noun}${of}`;
-      more.textContent = `Load ${Math.min(size, left)} more`;
+      label.textContent = `Load ${Math.min(size, left)} more`;
     } else {
       more.remove();
       observer?.disconnect();
@@ -214,10 +233,28 @@ function feedView(model, feed, kind, size, query) {
   const root = el("div", { class: "feed" }, list, more, status);
   drawNext();
   if (feed.length > shown) observer?.observe(more);
-  return { root, destroy: () => observer?.disconnect() };
+  return { root, destroy: () => { observer?.disconnect(); forgetRows(rows); } };
 }
 
-export function matchRow(model, fx, i = 0) {
+function chevronDown() {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "16");
+  svg.setAttribute("height", "16");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "2.4");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true");
+  const p = document.createElementNS(ns, "polyline");
+  p.setAttribute("points", "6 9 12 15 18 9");
+  svg.append(p);
+  return svg;
+}
+
+export function matchRow(model, fx) {
   const done = Number.isInteger(fx.ag) && Number.isInteger(fx.bg);
   const aWins = done && fx.ag > fx.bg;
   const bWins = done && fx.bg > fx.ag;
@@ -227,7 +264,7 @@ export function matchRow(model, fx, i = 0) {
         String(fx.ag), el("span", { class: "dash" }, "–"), String(fx.bg))
     : el("div", { class: "score score--pending" }, "vs");
 
-  return el("div", { class: "match", style: { "--i": i } },
+  return el("div", { class: "match" },
     el("div", { class: "meta" },
       el("b", {}, `Round ${fx.r}`),
       el("span", {}, `Leg ${fx.leg}`)
