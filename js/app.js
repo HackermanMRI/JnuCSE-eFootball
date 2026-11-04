@@ -9,11 +9,10 @@ import { buildModel } from "./core/model.js";
 import { el, mount, emptyState } from "./ui/dom.js";
 import { tabs, revealIn } from "./ui/interactions.js";
 import { initGlass } from "./ui/glass.js";
+import { initShell } from "./ui/shell.js";
 import { renderStandings, renderMatches } from "./ui/render-tables.js";
 import { renderNews, renderHistory, renderHallOfFame } from "./ui/render-content.js";
 import { renderPlayersPage } from "./ui/render-players.js";
-
-initGlass();
 
 const model = buildModel();
 const page = document.body.dataset.page;
@@ -31,6 +30,10 @@ switch (page) {
 }
 
 revealIn(document.body);
+
+/* The chrome goes on last: it measures the finished page. */
+initShell();
+initGlass();
 
 /* =========================================================================
    Shared chrome
@@ -59,11 +62,11 @@ function chrome() {
       chip.textContent = "Not started";
     } else {
       const s = model.current;
-      chip.replaceChildren(
-        document.createTextNode("Season "),
-        el("b", {}, String(s.number)),
-        document.createTextNode(s.completed ? " · complete" : "")
-      );
+      /* One text span, so the chip's flex gap only separates the dot. */
+      chip.replaceChildren(...[
+        s.completed ? null : el("span", { class: "live-dot", title: "Season in progress" }),
+        el("span", {}, "Season ", el("b", {}, String(s.number)), s.completed ? " · complete" : "")
+      ].filter(Boolean));
     }
   }
 
@@ -167,8 +170,10 @@ function playersPage() {
     mount(host, setupPanel());
     return;
   }
-  mount(host, renderPlayersPage(model));
+  const view = renderPlayersPage(model);
+  mount(host, view);
   revealIn(host);
+  view.openFromHash?.();
 }
 
 function historyPage() {

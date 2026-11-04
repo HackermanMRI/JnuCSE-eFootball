@@ -1,40 +1,68 @@
 /* =========================================================================
-   LAYOUT  —  shell, header, navigation, footer
+   LAYOUT  —  shell, header, navigation, page head, footer
+   =========================================================================
+   Geometry only. The glass these bars are made of lives in css/glass.css.
    ========================================================================= */
 
+/* No z-index here on purpose: the shell must not form a stacking context,
+   so the sticky tabs inside it can float above the scroll edge effect. It
+   still paints above the fixed backdrop, which comes first in the page. */
 .shell {
   position: relative;
-  z-index: 1;
   width: 100%;
   max-width: var(--shell);
   margin: 0 auto;
-  padding: 0 var(--s-5);
+  padding: 0 max(var(--gutter), var(--safe-r)) 0 max(var(--gutter), var(--safe-l));
 }
 
-/* Footer stays at the bottom on short pages. */
-body { display: flex; flex-direction: column; min-height: 100vh; }
+/* Footer stays at the bottom on short pages. dvh tracks the mobile
+   browser's collapsing toolbars; vh is the fallback. */
+body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
 main { flex: 1 0 auto; padding-bottom: var(--s-8); }
 .site-footer { flex: none; margin-top: auto; }
 
-/* ---- Header ------------------------------------------------------------ */
+/* ---- Header: a floating capsule ----------------------------------------
+   The header box is transparent and full width; the capsule is drawn by
+   its ::before / ::after in glass.css. Nothing here may create a containing
+   block (no transform, filter, backdrop-filter, contain or opacity
+   animation on .site-header): the mobile tab bar inside it is
+   position: fixed and must stay pinned to the screen, not to the header. */
 
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 50;
-  height: var(--header-h);
+  z-index: var(--z-header);
+  height: var(--sticky-top);
+  padding-top: var(--safe-t);
   display: flex;
   align-items: center;
-  background: rgba(10, 16, 32, .72);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border-bottom: 1px solid var(--line-soft);
+}
+
+/* The capsule's shape, with a plain fill. glass.css turns it into glass. */
+.site-header::before,
+.site-header::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--safe-t) + var(--bar-inset));
+  bottom: var(--bar-inset);
+  left:  max(12px, calc(50% - var(--shell) / 2), calc(var(--safe-l) + 8px));
+  right: max(12px, calc(50% - var(--shell) / 2), calc(var(--safe-r) + 8px));
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  transition: box-shadow var(--dur-slow) var(--ease-out);
+}
+.site-header::before {
+  z-index: -1;
+  background: var(--surface-2);
+  box-shadow: 0 12px 32px -12px rgba(0,0,0,.65);
 }
 
 .site-header .shell {
   display: flex;
   align-items: center;
-  gap: var(--s-5);
+  gap: var(--s-4);
+  height: 100%;
+  padding-inline: max(calc(var(--gutter) + 6px), var(--safe-l));
 }
 
 .brand {
@@ -42,9 +70,11 @@ main { flex: 1 0 auto; padding-bottom: var(--s-8); }
   align-items: center;
   gap: var(--s-3);
   flex: none;
-  color: var(--ink);
+  min-height: 44px;
+  color: var(--on-glass);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
 }
-.brand img, .brand svg { width: 34px; height: 34px; flex: none; }
+.brand img, .brand svg { width: 34px; height: 34px; flex: none; border-radius: 9px; }
 .brand-name {
   font-variation-settings: "wdth" 112;
   font-weight: 700;
@@ -53,76 +83,232 @@ main { flex: 1 0 auto; padding-bottom: var(--s-8); }
   white-space: nowrap;
 }
 
-.main-nav { display: flex; gap: var(--s-1); margin-left: auto; }
+/* ---- Navigation (desktop: pills inside the header capsule) ------------- */
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
 
 .main-nav a {
   position: relative;
-  display: block;
-  padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-sm);
-  color: var(--muted);
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-pill);
+  color: var(--on-glass-dim);
   font-size: var(--t-sm);
   font-weight: 600;
   white-space: nowrap;
-  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-slow) var(--spring-snappy);
 }
-.main-nav a:hover { color: var(--ink); background: rgba(255,255,255,.05); }
-.main-nav a[aria-current="page"] { color: var(--ink); }
-.main-nav a[aria-current="page"]::after {
-  content: "";
+.main-nav a:hover { color: var(--on-glass); background-color: rgba(255,255,255,.07); }
+.main-nav a[aria-current="page"] { color: var(--on-glass); }
+.main-nav a[aria-current="page"]:hover { background-color: transparent; }
+
+/* The selection lens. One per page, so it can morph between pages with a
+   cross-document view transition (animations.css). */
+.nav-lens {
   position: absolute;
-  left: var(--s-3); right: var(--s-3); bottom: -1px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--accent, var(--premium));
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: rgba(255,255,255,.1);
+  view-transition-name: nav-lens;
 }
+
+.nav-ico { display: none; width: 24px; height: 24px; fill: none; stroke: currentColor;
+           stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.nav-label { line-height: 1; }
+
+@media (pointer: coarse) {
+  .main-nav a { height: 44px; }
+}
+
+/* ---- Season chip: a label on the glass, not glass of its own ----------- */
 
 .season-chip {
   flex: none;
-  padding: var(--s-1) var(--s-3);
-  border: 1px solid var(--line);
-  border-radius: 99px;
-  background: var(--surface);
-  color: var(--ink-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-pill);
+  color: var(--on-glass-dim);
   font-size: var(--t-xs);
   font-weight: 600;
   white-space: nowrap;
 }
-.season-chip b { color: var(--ink); font-weight: 700; }
+.season-chip b { color: var(--on-glass); font-weight: 700; }
 
-/* ---- Page head --------------------------------------------------------- */
+/* A small live dot while a season is being played. */
+.live-dot {
+  position: relative;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--win);
+  box-shadow: 0 0 0 2px rgba(74,222,128,.18);
+}
+
+/* The page title, shown small in the bar once the large title scrolls
+   away (phones only, like an iOS navigation bar). */
+.bar-title { display: none; }
+
+/* ---- Page head: a large title ------------------------------------------ */
 
 .page-head {
   padding: var(--s-7) 0 var(--s-5);
-  border-bottom: 1px solid var(--line-soft);
-  margin-bottom: var(--s-6);
+  margin-bottom: var(--s-5);
 }
-.page-head h1 { font-size: var(--t-2xl); }
+.page-head h1 {
+  font-size: clamp(2.1rem, 1.35rem + 3.2vw, var(--t-2xl));
+  view-transition-name: page-title;
+  width: fit-content;
+}
 .page-head .kicker {
   display: block;
-  margin-bottom: var(--s-2);
-  color: var(--accent, var(--muted));
-  font-size: var(--t-sm);
+  margin-bottom: var(--s-3);
+  color: var(--tint);
+  font-size: var(--t-xs);
   font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
-.page-head .sub { color: var(--muted); margin-top: var(--s-3); }
+.page-head .sub {
+  max-width: 60ch;
+  margin-top: var(--s-3);
+  color: var(--muted);
+  font-size: var(--t-md);
+  line-height: 1.55;
+}
 
 /* ---- Footer ------------------------------------------------------------ */
 
 .site-footer {
   position: relative;
-  z-index: 1;
-  border-top: 1px solid var(--line-soft);
-  padding: var(--s-6) 0;
+  z-index: var(--z-content);
+  border-top: 1px solid var(--card-line);
+  padding: var(--s-6) 0 calc(var(--s-6) + var(--tabbar-space));
   color: var(--faint);
   font-size: var(--t-sm);
 }
 .site-footer .shell {
   display: flex;
   justify-content: space-between;
-  gap: var(--s-4);
+  align-items: center;
+  gap: var(--s-3) var(--s-5);
   flex-wrap: wrap;
 }
+.site-footer .credits { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); }
+
+/* In-app transparency switch. Safari has no prefers-reduced-transparency,
+   so iPhone visitors need this to turn the glass solid. */
+.pref-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  padding: 0 var(--s-4);
+  border: 1px solid var(--card-line);
+  border-radius: var(--r-pill);
+  background: var(--fill-1);
+  color: var(--ink-dim);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+              transform var(--dur-slow) var(--spring-snappy);
+}
+.pref-toggle:hover { background: var(--fill-2); color: var(--ink); }
+.pref-toggle:active { transform: scale(.96); }
+.pref-toggle .switch {
+  position: relative;
+  width: 30px; height: 18px;
+  border-radius: 99px;
+  background: var(--fill-3);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.pref-toggle .switch::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: transform var(--dur-slow) var(--spring-snappy);
+}
+.pref-toggle[aria-pressed="true"] .switch { background: var(--win); }
+.pref-toggle[aria-pressed="true"] .switch::after { transform: translateX(12px); }
+
+/* ---- Scroll edge effect -------------------------------------------------
+   Content dissolves softly where it slides under a floating bar, instead
+   of the bars having solid backgrounds. Only shown while content is
+   actually underneath (js/ui/shell.js toggles the classes). */
+
+.edge {
+  position: fixed;
+  left: 0; right: 0;
+  z-index: var(--z-edge);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+.edge-top {
+  top: 0;
+  height: var(--sticky-top);
+  background: linear-gradient(180deg, rgba(8,13,26,.78), rgba(8,13,26,.2));
+  -webkit-mask-image: linear-gradient(#000 40%, transparent);
+          mask-image: linear-gradient(#000 40%, transparent);
+}
+.edge-bottom { display: none; }
+html.is-scrolled .edge-top { opacity: 1; }
+/* With sticky tabs, the effect reaches down behind them too. */
+html.has-tabs .edge-top {
+  height: calc(var(--sticky-top) + 66px);
+  -webkit-mask-image: linear-gradient(#000 62%, transparent);
+          mask-image: linear-gradient(#000 62%, transparent);
+}
+
+/* ---- Back to top (desktop) --------------------------------------------- */
+
+.to-top {
+  position: fixed;
+  right: max(24px, calc(var(--safe-r) + 16px));
+  bottom: calc(24px + var(--safe-b));
+  z-index: var(--z-fab);
+  display: grid;
+  place-items: center;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  box-shadow: 0 12px 32px -12px rgba(0,0,0,.65);
+  color: var(--on-glass);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(.6);
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-slow) var(--spring-liquid),
+              visibility 0s linear var(--dur-base);
+}
+.to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity var(--dur-base) var(--ease-out),
+              transform var(--dur-xslow) var(--spring-liquid),
+              visibility 0s;
+}
+.to-top svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2;
+              stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---- Grids ------------------------------------------------------------- */
 
@@ -137,56 +323,106 @@ main { flex: 1 0 auto; padding-bottom: var(--s-8); }
    ========================================================================= */
 
 @media (max-width: 1024px) {
-  :root { --t-2xl: 2.1rem; --t-3xl: 2.75rem; }
+  :root { --t-3xl: 2.75rem; }
 }
 
 @media (max-width: 760px) {
-  :root { --t-2xl: 1.8rem; --t-xl: 1.5rem; }
+  :root { --t-xl: 1.5rem; }
 
-  .shell { padding: 0 var(--s-4); }
-  .page-head { padding: var(--s-5) 0 var(--s-4); margin-bottom: var(--s-5); }
+  .page-head { padding: var(--s-5) 0 var(--s-4); margin-bottom: var(--s-4); }
+  .page-head .sub { font-size: var(--t-base); }
 
-  /* backdrop-filter makes the header a containing block for fixed children,
-     which would pin the nav inside the header instead of to the screen.
-     The header goes near-solid here and the nav carries the blur instead. */
-  .site-header {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: var(--bg);
+  .site-header .shell { padding-inline: max(22px, calc(var(--safe-l) + 12px)) max(22px, calc(var(--safe-r) + 12px)); }
+  .site-header::before,
+  .site-header::after {
+    left:  max(10px, calc(var(--safe-l) + 6px));
+    right: max(10px, calc(var(--safe-r) + 6px));
   }
+  .brand-name { font-size: var(--t-base); }
+  .season-chip { margin-left: auto; }
 
-  /* Navigation moves to the thumb. */
+  /* The collapsed title sits in the middle of the bar. */
+  .bar-title {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: calc(var(--safe-t) + var(--header-h) / 2);
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--on-glass);
+    font-weight: 700;
+    font-size: var(--t-base);
+    letter-spacing: -0.01em;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px));
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-slow) var(--spring-gentle);
+  }
+  html.title-collapsed .bar-title { opacity: 1; transform: translate(-50%, -50%); }
+  html.title-collapsed .brand-name { opacity: 0; }
+
+  /* ---- Navigation moves to the thumb: a floating tab bar ---------------- */
   .main-nav {
     position: fixed;
-    left: 0; right: 0; bottom: 0;
-    z-index: 60;
+    z-index: var(--z-nav);
+    left: max(12px, calc(var(--safe-l) + 8px));
+    right: max(12px, calc(var(--safe-r) + 8px));
+    bottom: calc(10px + var(--safe-b));
     margin: 0;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
-    gap: 0;
-    padding: var(--s-2) var(--s-2) calc(var(--s-2) + env(safe-area-inset-bottom, 0px));
-    background: rgba(10, 16, 32, .92);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
-    border-top: 1px solid var(--line);
+    gap: 2px;
+    padding: 6px;
+    border-radius: 34px;
+    background: var(--surface-2);
+    box-shadow: 0 12px 32px -12px rgba(0,0,0,.65);
+    transition: left var(--dur-slow) var(--spring-gentle), right var(--dur-slow) var(--spring-gentle),
+                transform var(--dur-slow) var(--spring-gentle);
   }
   .main-nav a {
-    text-align: center;
-    padding: var(--s-2) var(--s-1);
-    font-size: var(--t-xs);
+    flex-direction: column;
+    gap: 3px;
+    height: 58px;
+    padding: 0 2px;
+    border-radius: 28px;                        /* concentric: 34 - 6 */
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    transition: color var(--dur-fast) var(--ease-out), height var(--dur-slow) var(--spring-gentle),
+                transform var(--dur-slow) var(--spring-snappy);
   }
-  .main-nav a[aria-current="page"]::after {
-    left: 50%; right: auto; bottom: 2px;
-    width: 18px;
-    transform: translateX(-50%);
+  .main-nav a:hover { background-color: transparent; }
+  .main-nav a[aria-current="page"] { color: var(--tint); }
+  .nav-ico { display: block; }
+  .nav-label {
+    max-height: 12px;
+    transition: opacity var(--dur-fast) var(--ease-out), max-height var(--dur-slow) var(--spring-gentle),
+                transform var(--dur-slow) var(--spring-gentle);
   }
 
-  main { padding-bottom: calc(var(--s-5) + 56px); }
-  .site-footer { padding-bottom: calc(var(--s-5) + 56px); }
+  /* Scrolling down tucks the bar in: labels go, the bar narrows. Scrolling
+     up, reaching the end, or touching it brings everything back. */
+  html.nav-min .main-nav { left: 15%; right: 15%; }
+  html.nav-min .main-nav a { height: 44px; gap: 0; }
+  html.nav-min .nav-label { opacity: 0; max-height: 0; transform: scale(.7); }
 
-  .brand-name { font-size: var(--t-base); }
-  .season-chip { margin-left: auto; }
+  /* While typing, the keyboard needs the room. */
+  body:has(.search-input:focus) .main-nav { transform: translateY(calc(100% + 24px)); }
+
+  .edge-bottom {
+    display: block;
+    bottom: 0;
+    height: calc(var(--tabbar-space) + 18px);
+    background: linear-gradient(0deg, rgba(8,13,26,.8), rgba(8,13,26,.15));
+    -webkit-mask-image: linear-gradient(0deg, #000 45%, transparent);
+            mask-image: linear-gradient(0deg, #000 45%, transparent);
+  }
+  html.has-below .edge-bottom { opacity: 1; }
+
+  .to-top { display: none; }
 }
 
 @media (max-width: 420px) {

@@ -1,100 +1,202 @@
 /* =========================================================================
    ANIMATIONS
    =========================================================================
-   Two kinds of motion only:
-     1. One orchestrated reveal as content arrives.
-     2. Motion that answers something the visitor did.
+   Motion answers something: a page arriving, content scrolling into view,
+   a press, a choice. Rules:
+     · transform and opacity only, so the compositor does the work
+       (the accordion height is the one deliberate exception);
+     · springs (tokens.css) instead of fixed curves where it moves;
+     · every effect is decoration: prefers-reduced-motion removes it and
+       the content is all still there.
+   Interactive motion (tab lens, accordion, count-ups, list reflow) lives in
+   js/ui/motion.js and js/ui/interactions.js and uses the same tokens.
    ========================================================================= */
 
-/* ---- Page load: header and page title settle first ---------------------- */
+/* ---- Keyframes ---------------------------------------------------------- */
 
-@keyframes settle {
-  from { opacity: 0; transform: translateY(-8px); }
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: none; }
 }
-/* The header fades only. A transform animation here — even one ending at
-   `none` — makes the header a containing block, which would trap the
-   fixed mobile navigation inside it instead of pinning it to the screen. */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.site-header { animation: fadeIn var(--mid) var(--ease-out) both; }
-.page-head   { animation: settle var(--slow) var(--ease-out) 60ms both; }
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.6); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes pillIn {
+  from { opacity: 0; transform: scale(.4); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes glow {
+  0%, 100% { opacity: .55; }
+  50%      { opacity: 1; }
+}
+@keyframes ping {
+  0%   { transform: scale(1);   opacity: .7; }
+  80%, 100% { transform: scale(2.6); opacity: 0; }
+}
+@keyframes sheen {
+  from { background-position: 120% 0; }
+  to   { background-position: -40% 0; }
+}
+@keyframes targetPulse {
+  0%   { box-shadow: var(--card-shadow-hi), 0 0 0 0 color-mix(in srgb, var(--tint) 70%, transparent); }
+  70%  { box-shadow: var(--card-shadow-hi), 0 0 0 14px color-mix(in srgb, var(--tint) 0%, transparent); }
+  100% { box-shadow: var(--card-shadow-hi), 0 0 0 0 transparent; }
+}
 
-/* ---- Reveal on arrival -------------------------------------------------- */
+/* ---- Page arrival -------------------------------------------------------
+   The large title block settles first, then the content cascades in.
+   When the page arrives through a view transition (html.vt-in, set in the
+   <head>), the title is already morphing, so it is left alone. */
+
+.page-head > * { animation: riseIn var(--dur-xslow) var(--spring-gentle) both; }
+.page-head .kicker { animation-delay: 40ms; }
+.page-head h1      { animation-delay: 110ms; }
+.page-head .sub    { animation-delay: 190ms; }
+html.vt-in .page-head > h1 { animation: none; }
+
+/* One glint across the large title as the page opens. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .page-head h1 {
+    background: linear-gradient(105deg, var(--ink) 42%, #ffffff 50%, var(--ink) 58%) 120% 0 / 260% 100% no-repeat,
+                var(--ink);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  .page-head h1 { animation: riseIn var(--dur-xslow) var(--spring-gentle) 110ms both,
+                             sheen 1.5s var(--ease-in-out) 650ms 1 both; }
+  html.vt-in .page-head > h1 { animation: sheen 1.5s var(--ease-in-out) 350ms 1 both; }
+}
+
+/* ---- Reveal on arrival (js/ui/interactions.js: revealIn) --------------- */
 
 .reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(18px);
 }
 .reveal.is-in {
   opacity: 1;
   transform: none;
   transition:
-    opacity var(--slow) var(--ease-out) var(--delay, 0ms),
-    transform var(--slow) var(--ease-out) var(--delay, 0ms);
+    opacity var(--dur-slow) var(--ease-out) var(--delay, 0ms),
+    transform var(--dur-xslow) var(--spring-gentle) var(--delay, 0ms);
 }
+
+/* Match rows wait off screen until js/ui/motion.js (revealRows) plays them
+   in, one by one, batch after batch. */
+.reveal-row { opacity: 0; }
 
 /* ---- Standings rows: a single sweep down the table ---------------------- */
 
-@keyframes rowIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: none; }
-}
 .standings tbody tr {
-  animation: rowIn var(--mid) var(--ease-out) both;
-  animation-delay: calc(var(--i, 0) * 34ms);
+  animation: rowIn var(--dur-slow) var(--spring-gentle) both;
+  animation-delay: calc(var(--i, 0) * 36ms + 60ms);
 }
 
 /* ---- Form pills pop in after their row ---------------------------------- */
 
-@keyframes pillIn {
-  from { opacity: 0; transform: scale(.6); }
-  to   { opacity: 1; transform: none; }
-}
 .form-pill {
-  animation: pillIn var(--fast) var(--ease-out) both;
-  animation-delay: calc(var(--row, 0) * 34ms + var(--p, 0) * 45ms + 160ms);
+  animation: pillIn var(--dur-slow) var(--spring-bouncy) both;
+  animation-delay: calc(var(--row, 0) * 36ms + var(--p, 0) * 45ms + 220ms);
 }
 
-/* ---- Tab crossfade ------------------------------------------------------ */
+/* ---- Accordion content: the sections settle one after another ---------- */
 
-@keyframes panelIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
+.acc.is-open .acc-inner > * {
+  animation: rise var(--dur-slow) var(--spring-gentle) both;
+  animation-delay: calc(var(--k, 0) * 55ms + 70ms);
 }
-.tab-panel.is-active { animation: panelIn var(--mid) var(--ease-out) both; }
-
-/* ---- Match rows --------------------------------------------------------- */
-
-.match {
-  animation: rowIn var(--mid) var(--ease-out) both;
-  animation-delay: calc(var(--i, 0) * 40ms);
+.acc.is-open .career > * {
+  animation: rise var(--dur-slow) var(--spring-gentle) both;
+  animation-delay: calc(var(--k, 0) * 70ms + 90ms);
 }
-
-/* ---- The champion's marker breathes, once the table has landed ---------- */
-
-@keyframes glow {
-  0%, 100% { opacity: .55; }
-  50%      { opacity: 1; }
+.acc.is-open .portrait img,
+.acc.is-open .portrait-fallback {
+  animation: portraitIn var(--dur-xslow) var(--spring-gentle) 80ms both;
 }
-tr[data-zone="champion"] .c-rank::before {
-  animation: glow 3.4s var(--ease) infinite 1s;
+@keyframes portraitIn {
+  from { opacity: 0; transform: scale(1.08); filter: blur(8px); }
+  to   { opacity: 1; transform: none; filter: none; }
 }
 
-/* ---- Records count up --------------------------------------------------- */
+/* A card opened from a link (players.html#player-…) pulses once. */
+.acc.is-target { animation: targetPulse 1.4s var(--ease-out) 1; }
 
-.record .v { transition: color var(--mid) var(--ease); }
+/* ---- Trophy stars pop when their card reaches the screen --------------- */
 
-/* ---- Setup panel -------------------------------------------------------- */
-
-@keyframes riseIn {
-  from { opacity: 0; transform: translateY(22px) scale(.985); }
-  to   { opacity: 1; transform: none; }
+.is-in .head-stars .star {
+  animation: popIn var(--dur-xslow) var(--spring-bouncy) both;
+  animation-delay: calc(var(--s, 0) * 90ms + 260ms);
 }
-.setup { animation: riseIn var(--slow) var(--ease-out) both; }
+
+/* ---- Small living details ----------------------------------------------- */
+
+tr[data-zone="champion"] .c-rank::before { animation: glow 3.4s ease-in-out infinite 1s; }
+
+.live-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--win);
+  animation: ping 2.4s var(--ease-out) infinite;
+}
+
+.empty { animation: riseIn var(--dur-xslow) var(--spring-gentle) 120ms both; }
+.empty-ico { animation: popIn var(--dur-xslow) var(--spring-bouncy) 260ms both; }
+
+/* Setup panel */
+.setup { animation: riseIn var(--dur-xslow) var(--spring-gentle) both; }
 .setup li {
-  animation: settle var(--mid) var(--ease-out) both;
+  animation: rise var(--dur-slow) var(--spring-gentle) both;
   animation-delay: calc(var(--i, 0) * 70ms + 220ms);
 }
+
+/* ---- Page to page: cross-document view transitions ---------------------
+   The page crossfades; the header and tab bar look still because they are
+   the same on both pages; the selection lens glides to the new tab on a
+   spring and the large title morphs into the next one. Chrome, Edge and
+   Safari 18.2+; other browsers simply navigate. */
+
+/* The opt-in itself (@view-transition) is inline in each page's <head>:
+   Chromium checks it on the arriving page before linked stylesheets apply. */
+
+::view-transition-old(root) {
+  animation: var(--dur-fast) var(--ease-in) both vtOut;
+}
+/* The arriving page fades in a beat later, so its content (rendered by
+   JavaScript) is usually there by the time it becomes visible. */
+::view-transition-new(root) {
+  animation: var(--dur-slow) var(--ease-out) 90ms both vtIn;
+}
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn  { from { opacity: 0; } }
+
+/* Snappy, not liquid: a 12% overshoot over a long jump (News to Players)
+   would carry the lens out past the end of the bar. */
+::view-transition-group(nav-lens) {
+  animation-duration: var(--dur-slow);
+  animation-timing-function: var(--spring-snappy);
+}
+::view-transition-old(nav-lens) { animation: none; opacity: 0; }
+::view-transition-new(nav-lens) { animation: none; }
+
+::view-transition-group(page-title) {
+  animation-duration: var(--dur-slow);
+  animation-timing-function: var(--spring-gentle);
+}
+::view-transition-old(page-title) { animation: var(--dur-fast) var(--ease-in) both vtOut; }
+::view-transition-new(page-title) { animation: var(--dur-base) var(--ease-out) 60ms both vtIn; }
 
 /* =========================================================================
    REDUCED MOTION
@@ -108,5 +210,6 @@ tr[data-zone="champion"] .c-rank::before {
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal { opacity: 1; transform: none; }
+  .reveal, .reveal-row { opacity: 1; transform: none; }
+  .page-head h1 { color: var(--ink); background: none; }
 }

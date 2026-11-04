@@ -1,12 +1,20 @@
 /* =========================================================================
    BASE  —  reset and typography
+   =========================================================================
+   The Archivo font is loaded by a <link> in each page's <head> (faster than
+   an @import here, which the browser only discovers after this file).
    ========================================================================= */
-
-@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..700&display=swap");
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+          text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;   /* press states are drawn by the components */
+  /* Keep focused or linked-to items clear of the sticky bars. */
+  scroll-padding-top: calc(var(--sticky-top) + 72px);
+  scroll-padding-bottom: calc(var(--tabbar-space) + 16px);
+}
 
 body {
   margin: 0;
@@ -17,8 +25,10 @@ body {
   line-height: 1.6;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* The floodlight: one soft pool of light behind the header, fixed so the
@@ -63,9 +73,13 @@ button {
   cursor: pointer;
 }
 
+/* No 300 ms double-tap-to-zoom wait on anything you can press. */
+a, button, input, [role="tab"], summary { touch-action: manipulation; }
+
 [hidden] { display: none !important; }
 
 img { max-width: 100%; display: block; }
+svg { flex: none; }
 
 ul, ol { margin: 0; padding: 0; list-style: none; }
 
@@ -73,21 +87,24 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .num { font-variant-numeric: tabular-nums; }
 
 :focus-visible {
-  outline: 2px solid var(--accent, var(--premium));
+  outline: 2px solid var(--tint, var(--premium));
   outline-offset: 3px;
   border-radius: var(--r-sm);
 }
+/* A heading focused by script (back to top) needs no ring. */
+h1[tabindex="-1"]:focus { outline: none; }
 
 ::selection { background: var(--premium); color: var(--bg-deep); }
 
 ::-webkit-scrollbar { height: 10px; width: 10px; }
-::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-3);
+  background: rgba(255,255,255,.16);
   border-radius: 99px;
-  border: 3px solid var(--bg-deep);
+  border: 3px solid transparent;
+  background-clip: padding-box;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--faint); }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(255,255,255,.28); }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px;

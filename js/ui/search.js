@@ -9,7 +9,7 @@
    default list the caller shows for an empty query. Escape does the same.
    ========================================================================= */
 
-import { el } from "./dom.js";
+import { el, icon } from "./dom.js";
 
 let uid = 0;
 
@@ -62,6 +62,7 @@ export function searchBar({ label, placeholder = "Search players by name", onCha
 /** "No matches" panel. The query is added as text, never as markup. */
 export function noMatches(query, what) {
   return el("div", { class: "empty" },
+    el("span", { class: "empty-ico" }, icon("search")),
     el("h3", {}, `No ${what} match “${query.trim()}”`),
     el("p", {}, "Check the spelling or try just a first name. Tap Reset to see everything again.")
   );

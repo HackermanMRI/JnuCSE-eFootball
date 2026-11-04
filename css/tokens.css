@@ -3,10 +3,17 @@
    =========================================================================
    The whole visual system in one place. Change a value here and it changes
    everywhere. Nothing in this file knows about the tournament.
+
+   Two layers, following Apple's Liquid Glass model:
+     content layer  cards, tables, rows, fields. Solid fills (--card-*).
+     control layer  the floating bars and buttons. Liquid glass (--glass-*).
+   Glass never sits on glass, and content is never glass.
    ========================================================================= */
 
 :root {
-  /* ---- Surfaces: a floodlit-night navy, not a grey black --------------- */
+  color-scheme: dark;
+
+  /* ---- Backdrop: a floodlit-night navy, not a grey black --------------- */
   --bg:          #0A1020;
   --bg-deep:     #060B16;
   --surface:     #141F35;
@@ -14,6 +21,18 @@
   --surface-3:   #243354;
   --line:        #23324F;
   --line-soft:   #1A263D;
+
+  /* ---- Content layer --------------------------------------------------- */
+  --card:        #111A2D;
+  --card-top:    #17223A;
+  --card-bg:     linear-gradient(180deg, var(--card-top), var(--card) 140px);
+  --card-line:   rgba(255,255,255,.075);
+  --card-line-hi:rgba(255,255,255,.15);
+  --card-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 14px 34px -22px rgba(0,0,0,.85);
+  --card-shadow-hi: inset 0 1px 0 rgba(255,255,255,.07), 0 22px 48px -24px rgba(0,0,0,.9);
+  --fill-1:      rgba(255,255,255,.045);
+  --fill-2:      rgba(255,255,255,.075);
+  --fill-3:      rgba(255,255,255,.11);
 
   /* ---- Text ------------------------------------------------------------ */
   --ink:         #E8EEFB;
@@ -51,7 +70,7 @@
   --t-md:   1.0625rem;
   --t-lg:   1.375rem;
   --t-xl:   1.875rem;
-  --t-2xl:  2.5rem;
+  --t-2xl:  2.75rem;
   --t-3xl:  3.5rem;
 
   /* ---- Space ----------------------------------------------------------- */
@@ -64,43 +83,93 @@
   --s-7: 3rem;
   --s-8: 4.5rem;
 
-  /* ---- Shape ----------------------------------------------------------- */
-  --r-sm: 6px;
-  --r:    10px;
-  --r-lg: 16px;
-  --r-xl: 22px;
+  /* ---- Shape. Capsules for controls; nested corners are concentric:
+          inner radius = outer radius - inset. ---------------------------- */
+  --r-sm:   8px;
+  --r:      12px;
+  --r-lg:   18px;
+  --r-xl:   24px;
+  --r-pill: 999px;
 
-  /* ---- Depth. Dark UI reads depth through light, not shadow. ----------- */
+  /* ---- Depth (legacy names, still used by a few components) ------------ */
   --lift-1: 0 1px 0 rgba(255,255,255,.04) inset, 0 1px 3px rgba(0,0,0,.4);
   --lift-2: 0 1px 0 rgba(255,255,255,.05) inset, 0 8px 28px rgba(0,0,0,.45);
   --lift-3: 0 1px 0 rgba(255,255,255,.06) inset, 0 20px 50px rgba(0,0,0,.55);
 
-  /* ---- Liquid glass. Used by css/glass.css. ---------------------------- */
-  --glass-bg:
-    linear-gradient(145deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.035) 45%, rgba(255,255,255,.07) 100%),
-    rgba(20, 31, 53, .64);
-  --glass-bg-bar:
-    linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 100%),
-    rgba(14, 22, 40, .62);
-  --glass-bg-lite:
-    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.02)),
-    rgba(20, 31, 53, .46);
-  --glass-bf:      blur(22px) saturate(175%);
-  --glass-bf-bar:  blur(16px) saturate(190%);
-  --glass-line:    rgba(255,255,255,.14);
-  --glass-top:     rgba(255,255,255,.36);
-  --glass-shadow:  0 14px 34px -10px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.22);
+  /* ---- Liquid glass: the regular variant. Used by css/glass.css only.
+          Light blur plus edge refraction; heavy blur is the old material.
+          The navy tint is what keeps labels legible over bright banners. -- */
+  --glass-tint:   rgba(12, 19, 36, .66);
+  --glass-sheen:  linear-gradient(180deg, rgba(255,255,255,.13) 0%, rgba(255,255,255,.035) 46%, rgba(255,255,255,.06) 100%);
+  --glass-bg:     var(--glass-sheen), var(--glass-tint);
+  --glass-filter: blur(10px) saturate(175%);
+  --glass-rim:    linear-gradient(155deg, rgba(255,255,255,.62), rgba(255,255,255,.10) 24%,
+                                  rgba(255,255,255,.03) 58%, rgba(255,255,255,.30));
+  --glass-shadow: 0 14px 36px -12px rgba(0,0,0,.66), 0 2px 8px -2px rgba(0,0,0,.36);
+  --glass-inner:  inset 0 1px 0 rgba(255,255,255,.26), inset 0 -1px 1px rgba(255,255,255,.05);
+  --lens-fill:    linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.085));
+  --lens-edge:    inset 0 1px 0 rgba(255,255,255,.5), inset 0 -1px 0 rgba(255,255,255,.06),
+                  inset 0 0 0 1px rgba(255,255,255,.08), 0 3px 12px -3px rgba(0,0,0,.5);
+  --on-glass:     #EEF3FD;
+  --on-glass-dim: #C6D1E6;
 
-  /* ---- Motion ---------------------------------------------------------- */
-  --spring:   cubic-bezier(.34, 1.4, .64, 1);
-  --ease:     cubic-bezier(.25, .8, .35, 1);
-  --ease-out: cubic-bezier(.16, 1, .3, 1);
-  --fast: 160ms;
-  --mid:  300ms;
-  --slow: 560ms;
+  /* ---- Motion ----------------------------------------------------------
+     Springs are sampled from a damped oscillator into linear() below.
+     These cubic-bezier values are the fallback for older browsers. ------ */
+  --dur-instant: 100ms;
+  --dur-fast:    180ms;
+  --dur-base:    280ms;
+  --dur-slow:    440ms;
+  --dur-xslow:   680ms;
 
-  --shell: 1180px;
-  --header-h: 64px;
+  --ease-out:    cubic-bezier(.16, 1, .3, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-in:     cubic-bezier(.55, 0, 1, .45);
+
+  --spring-snappy: cubic-bezier(.3, 1.25, .5, 1);
+  --spring-liquid: cubic-bezier(.34, 1.45, .55, 1);
+  --spring-gentle: cubic-bezier(.22, 1, .36, 1);
+  --spring-bouncy: cubic-bezier(.34, 1.8, .5, 1);
+
+  /* Legacy aliases kept for older rules. */
+  --ease:   cubic-bezier(.25, .8, .35, 1);
+  --spring: var(--spring-liquid);
+  --fast:   var(--dur-fast);
+  --mid:    var(--dur-base);
+  --slow:   var(--dur-xslow);
+
+  /* ---- Layering ------------------------------------------------------- */
+  --z-ambient: 0;
+  --z-content: 1;
+  --z-edge:    40;
+  --z-sticky:  45;                    /* the sticky tabs float above the edge effect */
+  --z-header:  50;
+  --z-fab:     55;
+  --z-nav:     60;
+
+  /* ---- Layout --------------------------------------------------------- */
+  --shell:     1180px;
+  --gutter:    var(--s-5);
+  --header-h:  64px;
+  --bar-inset: 8px;                   /* gap between the screen edge and a floating bar */
+  --safe-t:    env(safe-area-inset-top, 0px);
+  --safe-b:    env(safe-area-inset-bottom, 0px);
+  --safe-l:    env(safe-area-inset-left, 0px);
+  --safe-r:    env(safe-area-inset-right, 0px);
+  --sticky-top: calc(var(--header-h) + var(--safe-t));
+  --tabbar-space: 0px;                /* room kept free for the mobile tab bar */
+}
+
+/* Physical springs where the browser supports linear() easing.
+   snappy: k420 c32, 2% overshoot · liquid: k320 c20, 12% · gentle: k180 c26, none
+   bouncy: k260 c15, 19%. Generated, not hand-tuned. */
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring-snappy: linear(0, 0.0202, 0.0723, 0.1452, 0.2303, 0.3208, 0.4118, 0.4996, 0.5818, 0.6568, 0.7238, 0.7824, 0.8328, 0.8754, 0.9107, 0.9395, 0.9624, 0.9803, 0.994, 1.0039, 1.011, 1.0156, 1.0183, 1.0195, 1.0197, 1.019, 1.0178, 1.0163, 1.0146, 1.0128, 1.011, 1.0093, 1.0077, 1.0063, 1.005, 1.0039, 1.003, 1.0022, 1.0015, 1.001, 1);
+    --spring-liquid: linear(0, 0.042, 0.1479, 0.2907, 0.4484, 0.6039, 0.7457, 0.8664, 0.9626, 1.0338, 1.0815, 1.1089, 1.1197, 1.1178, 1.1071, 1.091, 1.0724, 1.0534, 1.0357, 1.0203, 1.0078, 0.9983, 0.9917, 0.9877, 0.9858, 0.9856, 0.9866, 0.9884, 0.9906, 0.9929, 0.9951, 0.997, 0.9986, 0.9999, 1.0008, 1.0014, 1.0017, 1.0017, 1.0017, 1.0015, 1);
+    --spring-gentle: linear(0, 0.0184, 0.0646, 0.1279, 0.2006, 0.277, 0.3534, 0.427, 0.4963, 0.5603, 0.6184, 0.6707, 0.7172, 0.7583, 0.7942, 0.8254, 0.8525, 0.8758, 0.8957, 0.9127, 0.9271, 0.9394, 0.9497, 0.9583, 0.9656, 0.9717, 0.9767, 0.9809, 0.9844, 0.9873, 0.9897, 0.9916, 0.9932, 0.9946, 0.9956, 0.9965, 0.9972, 0.9978, 0.9982, 0.9986, 1);
+    --spring-bouncy: linear(0, 0.0459, 0.1636, 0.3242, 0.5027, 0.6789, 0.8378, 0.9701, 1.071, 1.1398, 1.1786, 1.1918, 1.1848, 1.1635, 1.1333, 1.0992, 1.0652, 1.0342, 1.0082, 0.9882, 0.9743, 0.9663, 0.9633, 0.9642, 0.9681, 0.9737, 0.9802, 0.9868, 0.9928, 0.9979, 1.0019, 1.0047, 1.0064, 1.007, 1.0069, 1.0062, 1.0052, 1.0039, 1.0027, 1.0015, 1);
+  }
 }
 
 /* A tier sets --accent once, and every child component inherits it.
@@ -114,4 +183,15 @@
   --accent: var(--second);
   --accent-dim: var(--second-dim);
   --accent-wash: var(--second-wash);
+}
+
+/* The page tint: gold everywhere except the Second Tier pages. Set on body
+   so it resolves after data-tier has set --accent. */
+body { --tint: var(--accent, var(--premium)); }
+
+@media (max-width: 760px) {
+  :root {
+    --gutter: var(--s-4);
+    --tabbar-space: calc(78px + var(--safe-b));
+  }
 }
