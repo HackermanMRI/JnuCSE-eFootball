@@ -15,8 +15,8 @@
 /* ---- Keyframes ---------------------------------------------------------- */
 
 @keyframes riseIn {
-  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
-  to   { opacity: 1; transform: none; filter: none; }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }
@@ -43,39 +43,158 @@
   0%   { transform: scale(1);   opacity: .7; }
   80%, 100% { transform: scale(2.6); opacity: 0; }
 }
-@keyframes sheen {
-  from { background-position: 120% 0; }
-  to   { background-position: -40% 0; }
-}
 @keyframes targetPulse {
   0%   { box-shadow: var(--card-shadow-hi), 0 0 0 0 color-mix(in srgb, var(--tint) 70%, transparent); }
   70%  { box-shadow: var(--card-shadow-hi), 0 0 0 14px color-mix(in srgb, var(--tint) 0%, transparent); }
   100% { box-shadow: var(--card-shadow-hi), 0 0 0 0 transparent; }
 }
 
-/* ---- Page arrival -------------------------------------------------------
-   The large title block settles first, then the content cascades in.
-   When the page arrives through a view transition (html.vt-in, set in the
-   <head>), the title is already morphing, so it is left alone. */
+/* A page being prepared in the background (prerendered) holds its entrance
+   until it is actually shown. The class is set in each page's <head>. */
+html.is-prerendering *, html.is-prerendering *::before, html.is-prerendering *::after {
+  animation-play-state: paused !important;
+}
 
-.page-head > * { animation: riseIn var(--dur-xslow) var(--spring-gentle) both; }
-.page-head .kicker { animation-delay: 40ms; }
-.page-head h1      { animation-delay: 110ms; }
-.page-head .sub    { animation-delay: 190ms; }
-html.vt-in .page-head > h1 { animation: none; }
+/* ---- Text: the page head (js/ui/fx.js splits the letters and words) ------
+   Kicker: the letters close up from wide spacing.
+   Title:  letters rise in one after another, then a glint runs along them.
+   Sub:    words settle in one after another.
+   Arriving through a page transition (html.vt-in) the title is already
+   morphing from the last page's title, so only the glint plays. */
 
-/* One glint across the large title as the page opens. */
-@supports (background-clip: text) or (-webkit-background-clip: text) {
-  .page-head h1 {
-    background: linear-gradient(105deg, var(--ink) 42%, #ffffff 50%, var(--ink) 58%) 120% 0 / 260% 100% no-repeat,
-                var(--ink);
-    -webkit-background-clip: text;
-            background-clip: text;
-    color: transparent;
+@keyframes trackIn {
+  from { opacity: 0; letter-spacing: .42em; }
+  to   { opacity: 1; letter-spacing: .1em; }
+}
+@keyframes charIn {
+  from { opacity: 0; transform: translateY(.6em) rotate(7deg) scale(.86); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes charGlint {
+  0%, 100% { color: var(--ink); text-shadow: none; }
+  45%      { color: #fff; text-shadow: 0 0 18px color-mix(in srgb, var(--tint) 85%, transparent),
+                                       0 0 2px #fff; }
+}
+@keyframes wordIn {
+  from { opacity: 0; transform: translateY(.5em); }
+  to   { opacity: 1; transform: none; }
+}
+
+.page-head .kicker { animation: trackIn var(--dur-xslow) var(--ease-out) 40ms both; }
+
+/* Until fx.js has split it (or if it never does), the title simply rises. */
+.page-head h1 { animation: riseIn var(--dur-xslow) var(--spring-gentle) 110ms both; }
+.page-head h1[aria-label] { animation: none; }
+html.vt-in .page-head h1 { animation: none; }
+
+.split-word { display: inline-block; white-space: nowrap; }
+.split-char {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  animation:
+    charIn var(--dur-xslow) var(--spring-liquid) calc(var(--c, 0) * 28ms + 120ms) both,
+    charGlint 720ms var(--ease-in-out) calc(var(--c, 0) * 42ms + 760ms) 1 both;
+}
+html.vt-in .split-char {
+  animation: charGlint 720ms var(--ease-in-out) calc(var(--c, 0) * 42ms + 380ms) 1 both;
+}
+
+.page-head .sub { animation: riseIn var(--dur-xslow) var(--spring-gentle) 190ms both; }
+.page-head .sub:has(.split-in) { animation: none; }
+.split-in { animation: wordIn var(--dur-slow) var(--spring-gentle) calc(var(--w, 0) * 22ms + 300ms) both; }
+
+/* ---- Pitch: the line art behind the title (js/ui/fx.js builds it) --------
+   Each line has pathLength 1, so drawing it is one dash sliding to 0. A ball
+   then drifts along a looping path. Sits behind the text, faded toward it. */
+
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes ballRun { to { offset-distance: 100%; } }
+
+.page-head { position: relative; isolation: isolate; }
+.pitch-art {
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  top: 50%;
+  width: min(40%, 340px);
+  transform: translateY(-50%);
+  overflow: visible;
+  color: color-mix(in srgb, var(--tint) 70%, #ffffff);
+  opacity: .34;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 55%);
+          mask-image: linear-gradient(90deg, transparent, #000 55%);
+}
+.pitch-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 1.1s var(--ease-in-out) calc(var(--o, 0) * 150ms + 250ms) forwards;
+}
+.pitch-spot { fill: currentColor; animation: popIn var(--dur-slow) var(--spring-bouncy) 900ms both; transform-box: fill-box; transform-origin: center; }
+.pitch-ball {
+  fill: #fff;
+  filter: drop-shadow(0 0 5px currentColor);
+  offset-path: path("M180 110 C 230 40, 300 70, 296 110 S 230 190, 180 150 S 70 170, 62 110 S 130 40, 180 110");
+  offset-distance: 0%;
+  animation: fadeIn 500ms var(--ease-out) 1.4s both, ballRun 16s linear 1.4s infinite;
+}
+@media (max-width: 760px) {
+  .pitch-art { width: 64%; top: 46%; opacity: .2; }
+}
+
+/* The current page's nav icon redraws itself on arrival. */
+.nav-ico.is-drawn > * {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 620ms var(--ease-out) calc(var(--o, 0) * 110ms + 180ms) forwards;
+}
+
+/* ---- Scroll-driven: these move with the scrollbar, not with time ---------
+   Run by the browser's compositor, with no JavaScript. Chrome and Edge 115+,
+   Safari 26+, Firefox 159+; older browsers just do not show them. */
+
+@keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes headAway { to { opacity: 0; transform: translateY(-28px) scale(.97); } }
+@keyframes drift { to { transform: translateY(-9vh); } }
+
+.scroll-progress { display: none; }
+
+@supports (animation-timeline: scroll()) {
+  /* How far down the page you are, as a line of light along the bottom
+     rim of the header. */
+  .scroll-progress {
+    display: block;
+    position: absolute;
+    z-index: 1;
+    left:  max(34px, calc(50% - var(--shell) / 2 + 22px), calc(var(--safe-l) + 30px));
+    right: max(34px, calc(50% - var(--shell) / 2 + 22px), calc(var(--safe-r) + 30px));
+    bottom: calc(var(--bar-inset) + 1px);
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--tint) 30%, #fff);
+    transform-origin: 0 50%;
+    pointer-events: none;
+    animation: fill linear both;
+    animation-timeline: scroll(root block);
   }
-  .page-head h1 { animation: riseIn var(--dur-xslow) var(--spring-gentle) 110ms both,
-                             sheen 1.5s var(--ease-in-out) 650ms 1 both; }
-  html.vt-in .page-head > h1 { animation: sheen 1.5s var(--ease-in-out) 350ms 1 both; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* The large title sinks away as the page starts to scroll. */
+    .page-head {
+      animation: headAway linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 40px 360px;
+    }
+    /* The background glow moves slower than the page: depth behind the glass. */
+    .ambient {
+      animation: drift linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
 }
 
 /* ---- Reveal on arrival (js/ui/interactions.js: revealIn) --------------- */
@@ -103,6 +222,15 @@ html.vt-in .page-head > h1 { animation: none; }
   animation-delay: calc(var(--i, 0) * 36ms + 60ms);
 }
 
+/* Points roll up into place, row after row. */
+@keyframes rollUp { from { transform: translateY(115%); } to { transform: none; } }
+.roll { display: inline-block; overflow: hidden; vertical-align: bottom; line-height: 1.25; }
+.roll > span {
+  display: inline-block;
+  animation: rollUp var(--dur-xslow) var(--spring-snappy) both;
+  animation-delay: calc(var(--i, 0) * 36ms + 260ms);
+}
+
 /* ---- Form pills pop in after their row ---------------------------------- */
 
 .form-pill {
@@ -116,18 +244,30 @@ html.vt-in .page-head > h1 { animation: none; }
   animation: rise var(--dur-slow) var(--spring-gentle) both;
   animation-delay: calc(var(--k, 0) * 55ms + 70ms);
 }
+/* "backwards", not "both": once it has arrived, the photo must be free to
+   tilt toward the pointer (components.css). */
 .acc.is-open .career > * {
-  animation: rise var(--dur-slow) var(--spring-gentle) both;
+  animation: rise var(--dur-slow) var(--spring-gentle) backwards;
   animation-delay: calc(var(--k, 0) * 70ms + 90ms);
 }
+/* The photo settles from slightly zoomed in (it fades in by blur-up). */
 .acc.is-open .portrait img,
 .acc.is-open .portrait-fallback {
   animation: portraitIn var(--dur-xslow) var(--spring-gentle) 80ms both;
 }
 @keyframes portraitIn {
-  from { opacity: 0; transform: scale(1.08); filter: blur(8px); }
-  to   { opacity: 1; transform: none; filter: none; }
+  from { transform: scale(1.1); }
+  to   { transform: none; }
 }
+
+/* The won / drawn / lost bar grows out from the left. */
+@keyframes barIn { from { transform: scaleX(0); opacity: 0; } to { transform: none; opacity: 1; } }
+.acc.is-open .split-bar i {
+  animation: barIn var(--dur-xslow) var(--spring-gentle) both;
+  animation-delay: 320ms;
+}
+.acc.is-open .split-bar .d { animation-delay: 400ms; }
+.acc.is-open .split-bar .l { animation-delay: 480ms; }
 
 /* A card opened from a link (players.html#player-…) pulses once. */
 .acc.is-target { animation: targetPulse 1.4s var(--ease-out) 1; }
@@ -152,6 +292,25 @@ tr[data-zone="champion"] .c-rank::before { animation: glow 3.4s ease-in-out infi
   animation: ping 2.4s var(--ease-out) infinite;
 }
 
+/* ---- Results ticker ------------------------------------------------------ */
+
+@keyframes marquee { to { transform: translateX(-50%); } }
+.ticker { animation: riseIn var(--dur-xslow) var(--spring-gentle) 260ms both; }
+.ticker-track { animation: marquee var(--ticker-dur, 60s) linear infinite; }
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track,
+.ticker.is-paused .ticker-track { animation-play-state: paused; }
+
+/* ---- "New results are in" ------------------------------------------------ */
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(26px) scale(.8); }
+  to   { opacity: 1; transform: none; }
+}
+.update-toast { animation: toastIn var(--dur-xslow) var(--spring-liquid) both; }
+.update-ico svg { animation: spinOnce 900ms var(--spring-gentle) 300ms both; }
+@keyframes spinOnce { from { transform: rotate(-200deg); } to { transform: none; } }
+
 .empty { animation: riseIn var(--dur-xslow) var(--spring-gentle) 120ms both; }
 .empty-ico { animation: popIn var(--dur-xslow) var(--spring-bouncy) 260ms both; }
 
@@ -163,24 +322,42 @@ tr[data-zone="champion"] .c-rank::before { animation: glow 3.4s ease-in-out infi
 }
 
 /* ---- Page to page: cross-document view transitions ---------------------
-   The page crossfades; the header and tab bar look still because they are
-   the same on both pages; the selection lens glides to the new tab on a
-   spring and the large title morphs into the next one. Chrome, Edge and
-   Safari 18.2+; other browsers simply navigate. */
+   Going to a tab further right, the old page slides off to the left as the
+   new one slides in from the right; going back, the reverse (the <head>
+   script sets html.vt-forward / html.vt-back). The header and the tab bar
+   are captured separately, so they stay still while the page moves under
+   them; the selection lens glides to the new tab and the large title
+   morphs into the next one. Chrome, Edge and Safari 18.2+; other browsers
+   simply navigate. */
 
 /* The opt-in itself (@view-transition) is inline in each page's <head>:
    Chromium checks it on the arriving page before linked stylesheets apply. */
 
-::view-transition-old(root) {
-  animation: var(--dur-fast) var(--ease-in) both vtOut;
-}
-/* The arriving page fades in a beat later, so its content (rendered by
-   JavaScript) is usually there by the time it becomes visible. */
-::view-transition-new(root) {
-  animation: var(--dur-slow) var(--ease-out) 90ms both vtIn;
-}
+.site-header { view-transition-name: site-header; }
+.main-nav    { view-transition-name: main-nav; }
+
 @keyframes vtOut { to { opacity: 0; } }
 @keyframes vtIn  { from { opacity: 0; } }
+@keyframes vtOutLeft  { to   { opacity: 0; transform: translateX(-36px) scale(.985); } }
+@keyframes vtOutRight { to   { opacity: 0; transform: translateX(36px) scale(.985); } }
+@keyframes vtInRight  { from { opacity: 0; transform: translateX(44px); } }
+@keyframes vtInLeft   { from { opacity: 0; transform: translateX(-44px); } }
+
+::view-transition-old(root) { animation: var(--dur-fast) var(--ease-in) both vtOut; }
+/* The arriving page comes in a beat later, so its content (rendered by
+   JavaScript) is usually there by the time it becomes visible. */
+::view-transition-new(root) { animation: var(--dur-slow) var(--ease-out) 90ms both vtIn; }
+
+html.vt-forward::view-transition-old(root) { animation: 220ms var(--ease-in) both vtOutLeft; }
+html.vt-forward::view-transition-new(root) { animation: var(--dur-slow) var(--spring-gentle) 80ms both vtInRight; }
+html.vt-back::view-transition-old(root)    { animation: 220ms var(--ease-in) both vtOutRight; }
+html.vt-back::view-transition-new(root)    { animation: var(--dur-slow) var(--spring-gentle) 80ms both vtInLeft; }
+
+/* The bars look the same on both pages. Keep showing the old header until
+   late in the move, then crossfade: by then the new page has put its logo
+   and season chip in place, so nothing flickers. */
+::view-transition-old(site-header) { animation: 180ms linear 280ms both vtOut; }
+::view-transition-new(site-header) { animation: 180ms linear 280ms both vtIn; }
 
 /* Snappy, not liquid: a 12% overshoot over a long jump (News to Players)
    would carry the lens out past the end of the bar. */
@@ -211,5 +388,10 @@ tr[data-zone="champion"] .c-rank::before { animation: glow 3.4s ease-in-out infi
     scroll-behavior: auto !important;
   }
   .reveal, .reveal-row { opacity: 1; transform: none; }
-  .page-head h1 { color: var(--ink); background: none; }
+  .pitch-line, .nav-ico.is-drawn > * { stroke-dashoffset: 0; }
+  /* The ticker stands still and can be scrolled by hand. */
+  .ticker-track { animation: none; }
+  .ticker-track ul[aria-hidden] { display: none; }
+  .ticker-view { overflow-x: auto; scrollbar-width: none; }
+  .ticker-toggle { display: none; }
 }

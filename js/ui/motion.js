@@ -162,7 +162,7 @@ export function flip(nodes, mutate) {
   for (const n of nodes) {
     if (n.hidden) continue;
     const r = n.getBoundingClientRect();
-    if (near(r)) first.set(n, r.top);
+    if (near(r)) first.set(n, r);
   }
 
   mutate();
@@ -173,14 +173,17 @@ export function flip(nodes, mutate) {
     if (n.hidden) continue;
     const r = n.getBoundingClientRect();
     if (!near(r)) continue;
-    plays.push([n, first.get(n), r.top]);
+    plays.push([n, first.get(n), r]);
   }
   for (const [n, before, after] of plays) {
-    if (before === undefined) {
+    if (!before) {
       n.animate([{ opacity: 0, transform: "translateY(12px) scale(.97)" }, { opacity: 1, transform: "none" }],
         { duration: DUR.snappy, easing: easing("snappy") });
-    } else if (Math.abs(before - after) > .5) {
-      n.animate([{ transform: `translateY(${before - after}px)` }, { transform: "none" }],
+      continue;
+    }
+    const dx = before.left - after.left, dy = before.top - after.top;
+    if (Math.abs(dx) > .5 || Math.abs(dy) > .5) {
+      n.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
         { duration: DUR.liquid, easing: easing("liquid") });
     }
   }

@@ -10,17 +10,46 @@
 <!-- Page-to-page transitions. Inline, not in animations.css: Chromium decides
      whether the arriving page opts in before external stylesheets apply. -->
 <style>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
-<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="icon" href="assets/_small/favicon.png" type="image/png">
 <script>
-  /* Runs before the first paint: keeps the drifting background continuous
-     between pages and applies the transparency preference without a flash.
-     See docs/07-LIQUID-GLASS.md. */
+  /* Runs before the first paint. See docs/07-LIQUID-GLASS.md. */
   (function () {
     var d = document.documentElement;
-    /* Arriving through a view transition: the title is already morphing. */
-    addEventListener("pagereveal", function (e) { if (e.viewTransition) d.classList.add("vt-in"); });
+    var ORDER = ["index", "premium", "second-tier", "history", "players"];
+    function place(url) {
+      try {
+        var m = new URL(url, location.href).pathname.match(/([\w-]+)\.html$/);
+        return m ? ORDER.indexOf(m[1]) : 0;          /* "/" is the News page */
+      } catch (e) { return -1; }
+    }
+    /* Arriving through a page transition: note which way we travelled along
+       the tab bar, so the pages slide the matching way (animations.css). */
+    addEventListener("pagereveal", function (e) {
+      if (!e.viewTransition) return;
+      d.classList.add("vt-in");
+      var nav = window.navigation, from = nav && nav.activation && nav.activation.from;
+      var a = place((from && from.url) || document.referrer), b = place(location.href);
+      if (a >= 0 && b >= 0 && a !== b) d.classList.add(b > a ? "vt-forward" : "vt-back");
+    });
+    /* A page prepared in the background waits to animate until it is shown. */
+    if (document.prerendering) {
+      d.classList.add("is-prerendering");
+      document.addEventListener("prerenderingchange", function () { d.classList.remove("is-prerendering"); }, { once: true });
+    }
+    /* The background worker (sw.js) says when it has found newer files than
+       the ones on screen. Listen from the very start; js/ui/offline.js
+       shows the notice. */
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", function (e) {
+        if (!e.data || e.data.type !== "content-updated") return;
+        window.__contentUpdated = true;
+        dispatchEvent(new Event("jnucse:updated"));
+      });
+    }
     try {
+      /* Keeps the drifting background continuous from page to page. */
       d.style.setProperty("--ambient-t", "-" + (Date.now() / 1000 % 600).toFixed(2) + "s");
+      /* Applies the "Reduce transparency" choice without a flash. */
       var p = localStorage.getItem("jnucse:transparency");
       if (p === "reduced" || (p !== "full" && matchMedia("(prefers-reduced-transparency: reduce)").matches)) {
         d.dataset.transparency = "reduced";
@@ -28,15 +57,54 @@
     } catch (e) {}
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..700&display=swap">
+<!-- The font is served from this site (assets/fonts), so text does not wait
+     on a second server. -->
+<link rel="preload" href="assets/fonts/archivo-latin.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/animations.css">
 <link rel="stylesheet" href="css/glass.css">
+<!-- Every script the page needs, fetched together instead of one after
+     another. tests/site.test.js fails if this list drifts from the code. -->
+<link rel="modulepreload" href="js/app.js">
+<link rel="modulepreload" href="assets/_small/manifest.js">
+<link rel="modulepreload" href="data/config.js">
+<link rel="modulepreload" href="data/news.js">
+<link rel="modulepreload" href="data/players.js">
+<link rel="modulepreload" href="data/seasons/_index.js">
+<link rel="modulepreload" href="js/core/careers.js">
+<link rel="modulepreload" href="js/core/fixtures.js">
+<link rel="modulepreload" href="js/core/model.js">
+<link rel="modulepreload" href="js/core/rules.js">
+<link rel="modulepreload" href="js/core/search.js">
+<link rel="modulepreload" href="js/core/season.js">
+<link rel="modulepreload" href="js/core/standings.js">
+<link rel="modulepreload" href="js/core/stats.js">
+<link rel="modulepreload" href="js/core/tiebreak.js">
+<link rel="modulepreload" href="js/core/validate.js">
+<link rel="modulepreload" href="js/ui/dom.js">
+<link rel="modulepreload" href="js/ui/fx.js">
+<link rel="modulepreload" href="js/ui/glass.js">
+<link rel="modulepreload" href="js/ui/images.js">
+<link rel="modulepreload" href="js/ui/interactions.js">
+<link rel="modulepreload" href="js/ui/motion.js">
+<link rel="modulepreload" href="js/ui/offline.js">
+<link rel="modulepreload" href="js/ui/render-content.js">
+<link rel="modulepreload" href="js/ui/render-players.js">
+<link rel="modulepreload" href="js/ui/render-tables.js">
+<link rel="modulepreload" href="js/ui/search.js">
+<link rel="modulepreload" href="js/ui/shell.js">
+<!-- Chrome and Edge: fetch the other pages ahead of time, and prepare one in
+     the background when a link is about to be pressed. Other browsers skip
+     this; the service worker (sw.js) covers them. -->
+<script type="speculationrules">
+{
+  "prefetch":  [{ "where": { "selector_matches": ".main-nav a" }, "eagerness": "eager" }],
+  "prerender": [{ "where": { "selector_matches": ".main-nav a, .player-link, .tick" }, "eagerness": "moderate" }]
+}
+</script>
 </head>
 <body data-page="history">
 

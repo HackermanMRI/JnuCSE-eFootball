@@ -1,9 +1,20 @@
 /* =========================================================================
    BASE  —  reset and typography
    =========================================================================
-   The Archivo font is loaded by a <link> in each page's <head> (faster than
-   an @import here, which the browser only discovers after this file).
    ========================================================================= */
+
+/* Archivo, served from this site: one 60 KB file with the weights (400 to
+   800) and widths (100 to 125) the design uses, Latin letters only. Each
+   page preloads it. Other scripts fall back to the system font.
+   Licence: assets/fonts/OFL.txt. */
+@font-face {
+  font-family: "Archivo";
+  src: url("../assets/fonts/archivo-latin.woff") format("woff");
+  font-weight: 400 800;
+  font-stretch: 100% 125%;
+  font-style: normal;
+  font-display: swap;
+}
 
 *, *::before, *::after { box-sizing: border-box; }
 

@@ -9,7 +9,7 @@ export const CONFIG = {
 
   /* ---- Site identity ---------------------------------------------------- */
   siteName: "JnUCSE eFootball",
-  logo: "assets/logo.svg",          // replace this file with your own logo
+  logo: "assets/logo.jpg",          // replace this file with your own logo (JPG or PNG; see docs/09-SPEED.md)
 
   /* ---- Tier sizing ------------------------------------------------------ */
   // How many players sit in Premium Tier.

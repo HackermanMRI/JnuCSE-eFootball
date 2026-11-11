@@ -14,7 +14,7 @@ Open `data/players.js` and add a line:
 |---|---|
 | `id` | lowercase letters, numbers, `-` and `_` only. No spaces. **Permanent — never change it and never reuse it for a different person.** |
 | `name` | what appears on the site. Anything you like. |
-| `photo` | optional. Put the image in `assets/players/`. A placeholder shows if the file is missing. |
+| `photo` | optional. Put the image in `assets/players/`, then run `python3 tools/optimize-images.py` (see `docs/09-SPEED.md`). A placeholder shows if the file is missing. |
 
 Leave players in this file forever, even after they stop playing. Their past seasons still reference them.
 
@@ -51,3 +51,5 @@ Do **not** delete them from `players.js`. If they were in Premium Tier, the next
 ## Changing a photo or a display name
 
 Edit `data/players.js` and save. Nothing else is affected — names and photos are display only, and every calculation uses the `id`.
+
+After replacing a photo file, run `python3 tools/optimize-images.py` so the small copies match the new picture (see `docs/09-SPEED.md`).

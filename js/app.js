@@ -11,8 +11,11 @@ import { tabs, revealIn } from "./ui/interactions.js";
 import { initGlass } from "./ui/glass.js";
 import { initShell } from "./ui/shell.js";
 import { renderStandings, renderMatches } from "./ui/render-tables.js";
-import { renderNews, renderHistory, renderHallOfFame } from "./ui/render-content.js";
+import { renderNews, renderTicker, renderHistory, renderHallOfFame } from "./ui/render-content.js";
 import { renderPlayersPage } from "./ui/render-players.js";
+import { small, guard } from "./ui/images.js";
+import { initFx } from "./ui/fx.js";
+import { initOffline } from "./ui/offline.js";
 
 const model = buildModel();
 const page = document.body.dataset.page;
@@ -34,6 +37,10 @@ revealIn(document.body);
 /* The chrome goes on last: it measures the finished page. */
 initShell();
 initGlass();
+initFx();
+
+/* Last, and off the critical path: background caching (sw.js). */
+initOffline();
 
 /* =========================================================================
    Shared chrome
@@ -51,8 +58,9 @@ function chrome() {
   /* Logo: swap in the configured file, fall back to the inline mark. */
   const slot = document.getElementById("logo-slot");
   if (slot && model.config.logo) {
-    const img = el("img", { src: model.config.logo, alt: "" });
-    img.addEventListener("error", () => {}, { once: true });
+    /* 96 px is plenty for a 34 px mark, even on a sharp screen. */
+    const img = el("img", { src: small(model.config.logo, 96).src, alt: "", width: 34, height: 34, decoding: "async" });
+    guard(img, model.config.logo);
     img.addEventListener("load", () => slot.replaceChildren(img));
   }
 
@@ -134,7 +142,7 @@ function home() {
     mount(host, setupPanel());
     return;
   }
-  mount(host, renderNews(model));
+  mount(host, renderTicker(model), renderNews(model));
   revealIn(host);
 }
 

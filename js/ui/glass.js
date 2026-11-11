@@ -11,7 +11,8 @@
         stronger rim. Maps are rebuilt when a bar changes size.
      2. Press response: glass controls swell and light blooms from the
         touch point.
-     3. Pointer light on content cards (desktop).
+     3. Pointer light on content cards, and a slight tilt toward the
+        pointer on record cards and player photos (desktop).
      4. The "Reduce transparency" switch in the footer, for browsers that
         cannot report the system setting (Safari).
    ========================================================================= */
@@ -185,24 +186,44 @@ function pressResponse() {
 /* ---- 3. Pointer light on content cards -------------------------------------- */
 
 const CARDS = ".table-wrap, .acc, .record, .season-card";
+const TILT = ".record, .season-card, .portrait";
 
 function pointerLight() {
   if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-  let queued = false, x = 0, y = 0, target = null;
+  const still = matchMedia("(prefers-reduced-motion: reduce)");
+  let queued = false, x = 0, y = 0, card = null, tilt = null, tilted = null;
+
+  const level = (node) => {
+    node?.style.removeProperty("--tx");
+    node?.style.removeProperty("--ty");
+  };
 
   document.addEventListener("pointermove", e => {
-    const card = e.target instanceof Element ? e.target.closest(CARDS) : null;
-    if (!card) return;
-    target = card; x = e.clientX; y = e.clientY;
+    const t = e.target instanceof Element ? e.target : null;
+    card = t?.closest(CARDS) || null;
+    tilt = t?.closest(TILT) || null;
+    x = e.clientX; y = e.clientY;
     if (queued) return;
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
-      const r = target.getBoundingClientRect();
-      target.style.setProperty("--mx", `${x - r.left}px`);
-      target.style.setProperty("--my", `${y - r.top}px`);
+      /* Reads, then writes. */
+      const cr = card?.getBoundingClientRect();
+      const tr = tilt && !still.matches ? tilt.getBoundingClientRect() : null;
+      if (cr) {
+        card.style.setProperty("--mx", `${x - cr.left}px`);
+        card.style.setProperty("--my", `${y - cr.top}px`);
+      }
+      if (tilted && tilted !== tilt) level(tilted);
+      if (tr) {
+        tilt.style.setProperty("--tx", (((x - tr.left) / tr.width) * 2 - 1).toFixed(3));
+        tilt.style.setProperty("--ty", (((y - tr.top) / tr.height) * 2 - 1).toFixed(3));
+      }
+      tilted = tr ? tilt : null;
     });
   }, { passive: true });
+
+  document.addEventListener("pointerleave", () => { level(tilted); tilted = null; });
 }
 
 /* ---- 4. Reduce transparency ---------------------------------------------------- */
