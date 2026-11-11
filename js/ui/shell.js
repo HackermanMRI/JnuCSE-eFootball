@@ -29,6 +29,9 @@ export function initShell() {
   if (header && h1) {
     header.append(el("span", { class: "bar-title", "aria-hidden": "true" }, h1.textContent.trim()));
   }
+  /* A line of light along the header's rim that fills as you scroll
+     (pure CSS, see animations.css; hidden where unsupported). */
+  header?.append(el("span", { class: "scroll-progress", "aria-hidden": "true" }));
 
   const toTop = el("button", { class: "to-top gi", type: "button", "aria-label": "Back to top" }, arrowUp());
   document.body.append(toTop);

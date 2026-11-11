@@ -4,6 +4,8 @@
    Small utilities shared by the renderers. No tournament logic lives here.
    ========================================================================= */
 
+import { small, guard } from "./images.js";
+
 export function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
@@ -61,8 +63,13 @@ export function avatar(model, id, large = false) {
   if (!p?.photo) {
     return el("div", { class: cls + " avatar-fallback", "aria-hidden": "true" }, initials(name));
   }
-  const img = el("img", { class: cls, src: p.photo, alt: "", loading: "lazy" });
-  img.addEventListener("error", () => {
+  /* A 128 px copy is plenty for a circle of 30 to 60 px. */
+  const pic = small(p.photo, 128);
+  const img = el("img", {
+    class: cls, src: pic.src, alt: "", loading: "lazy", decoding: "async",
+    width: large ? 60 : 30, height: large ? 60 : 30
+  });
+  guard(img, p.photo, () => {
     img.replaceWith(el("div", { class: cls + " avatar-fallback", "aria-hidden": "true" }, initials(name)));
   });
   return img;
@@ -111,7 +118,8 @@ const ICONS = {
   search:   ["M10.5 17.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z", "m20.5 20.5-5-5"],
   users:    ["M9 11.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5Z", "M3.25 19.5a5.75 5.75 0 0 1 11.5 0", "M15.25 5.2a3.25 3.25 0 0 1 0 6.1", "M17.5 14.2a5.75 5.75 0 0 1 3.25 5.3"],
   news:     ["M4 4.75h12.5a1 1 0 0 1 1 1V18a1.75 1.75 0 0 0 1.75 1.75H6.25A2.25 2.25 0 0 1 4 17.5Z", "M17.5 8.5h2.25a.75.75 0 0 1 .75.75V18a1.75 1.75 0 0 1-3 1.2", "M7.5 8.5h6M7.5 12h6M7.5 15.5h3.5"],
-  check:    ["M5 12.5 10 17.5 19.5 7"]
+  check:    ["M5 12.5 10 17.5 19.5 7"],
+  refresh:  ["M20 12a8 8 0 1 1-2.6-5.9", "M20 4.5v4.6h-4.6"]
 };
 
 /** A line icon from the set above. Decorative: hidden from screen readers. */

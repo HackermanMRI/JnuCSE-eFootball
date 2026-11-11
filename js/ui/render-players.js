@@ -11,6 +11,7 @@ import { accordion, revealNow } from "./interactions.js";
 import { searchBar, noMatches } from "./search.js";
 import { matchesQuery } from "../core/search.js";
 import { countUp, flip, scrollToY, headerBottom } from "./motion.js";
+import { small, guard, blurUp } from "./images.js";
 
 const TIER_LABEL = { premium: "Premium", second: "Second Tier" };
 const TROPHY_LABEL = { premium: "Premium champion", second: "Second Tier winner" };
@@ -33,7 +34,7 @@ export function renderPlayersPage(model) {
     };
   });
 
-  const list = el("div", { class: "news-list" }, items.map(i => i.node));
+  const list = el("div", { class: "news-list players-grid" }, items.map(i => i.node));
   const note = el("p", { class: "feed-status", role: "status" });
   const none = el("div", { hidden: "" });
 
@@ -113,6 +114,7 @@ function careerCard(model, c) {
         stat(c.lost, "Lost"),
         stat(c.played ? pct(c.winPct) : "—", "Win rate", true)
       ),
+      splitBar(c),
       el("div", { class: "player-meta" },
         line("Biggest win", scoreRecord(model, c.biggestWin, "No wins yet")),
         line("Biggest loss", scoreRecord(model, c.biggestLoss, "No losses yet")),
@@ -146,10 +148,21 @@ function portrait(model, id, name) {
 
   if (!p?.photo) { fallback(); return frame; }
 
-  const img = el("img", { src: p.photo, alt: name, loading: "lazy", decoding: "async" });
-  img.addEventListener("error", fallback, { once: true });
+  const pic = small(p.photo, 640);
+  const img = el("img", { src: pic.src, alt: name, decoding: "async" });
+  guard(img, p.photo, fallback);
   frame.append(img);
+  blurUp(frame, img, pic.ph);
   return frame;
+}
+
+/** Won, drawn and lost as shares of one bar. Decorative: the numbers are
+    in the boxes above, so screen readers skip it. */
+function splitBar(c) {
+  if (!c.played) return null;
+  const part = (cls, n) => n ? el("i", { class: cls, style: { flexGrow: n } }) : null;
+  return el("div", { class: "split-bar", "aria-hidden": "true" },
+    part("w", c.won), part("d", c.drawn), part("l", c.lost));
 }
 
 function stat(value, label, accent = false) {

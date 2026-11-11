@@ -22,7 +22,7 @@ Sakib stays within one point with four matches to play.`
 |---|---|
 | `id` | unique, never reused. Anything readable. |
 | `title` | headline on the collapsed card. |
-| `banner` | landscape image in `assets/news/`. About 1200x500 looks best. Optional. |
+| `banner` | landscape image in `assets/news/`. About 1200x500 looks best. Optional. After adding one, run `python3 tools/optimize-images.py` (see `docs/09-SPEED.md`). |
 | `date` | `"YYYY-MM-DD"`. This is what sorts the feed and what shows on the card. |
 | `body` | the post. Use backticks so you can write across multiple lines. A blank line starts a new paragraph. Wrap words in `*asterisks*` for emphasis. |
 | `pinned` | optional. `pinned: true` keeps it above everything else. |

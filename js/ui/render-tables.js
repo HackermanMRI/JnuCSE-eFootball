@@ -70,7 +70,7 @@ export function renderStandings(model, season, tier) {
       "data-slim": c.slim ? "1" : "0",
       class: "num" + (c.k === "gd" ? ` c-gd ${r.gd > 0 ? "pos" : r.gd < 0 ? "neg" : ""}` : "")
     }, c.k === "gd" ? signed(r.gd) : String(r[c.k]))),
-    el("td", { class: "c-pts num" }, String(r.pts)),
+    el("td", { class: "c-pts num" }, el("span", { class: "roll" }, el("span", {}, String(r.pts)))),
     el("td", {}, formRow(r.form.slice(-model.config.formLength), i))
   ));
 
