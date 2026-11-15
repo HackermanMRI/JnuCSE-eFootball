@@ -49,10 +49,10 @@ export default [
   { r:  5, leg: 1, a: "mrinmoy",  b: "walid",    ag: 1, bg: 2 },
 
   // Round 6
-  { r:  6, leg: 1, a: "sijad",    b: "abid",     ag: null, bg: null },
+  { r:  6, leg: 1, a: "sijad",    b: "abid",     ag: 3, bg: 4 },
   { r:  6, leg: 1, a: "piyal",    b: "walid",    ag: 1, bg: 2 },
   { r:  6, leg: 1, a: "mahir",    b: "mrinmoy",  ag: 3, bg: 3 },
-  { r:  6, leg: 1, a: "jaheen",   b: "abdulla",  ag: null, bg: null },
+  { r:  6, leg: 1, a: "jaheen",   b: "abdulla",  ag: 1, bg: 1 },
   { r:  6, leg: 1, a: "seam",     b: "jihad",    ag: null, bg: null },
 
   // Round 7
