@@ -58,13 +58,13 @@ export default [
   // Round 7
   { r:  7, leg: 1, a: "sijad",    b: "abdulla",  ag: 3, bg: 1 },
   { r:  7, leg: 1, a: "arittro",  b: "jihad",    ag: 3, bg: 1 },
-  { r:  7, leg: 1, a: "mrinmoy",  b: "seam",     ag: null, bg: null },
+  { r:  7, leg: 1, a: "mrinmoy",  b: "seam",     ag: 0, bg: 1 },
   { r:  7, leg: 1, a: "walid",    b: "jaheen",   ag: 6, bg: 0 },
   { r:  7, leg: 1, a: "piyal",    b: "mahir",    ag: null, bg: null },
 
   // Round 8
   { r:  8, leg: 1, a: "sijad",    b: "walid",    ag: null, bg: null },
-  { r:  8, leg: 1, a: "abid",     b: "mrinmoy",  ag: null, bg: null },
+  { r:  8, leg: 1, a: "abid",     b: "mrinmoy",  ag: 1, bg: 0 },
   { r:  8, leg: 1, a: "piyal",    b: "arittro",  ag: null, bg: null },
   { r:  8, leg: 1, a: "mahir",    b: "abdulla",  ag: null, bg: null },
   { r:  8, leg: 1, a: "jaheen",   b: "seam",     ag: null, bg: null },
@@ -74,17 +74,17 @@ export default [
   { r:  9, leg: 1, a: "seam",     b: "piyal",    ag: null, bg: null },
   { r:  9, leg: 1, a: "jihad",    b: "abid",     ag: null, bg: null },
   { r:  9, leg: 1, a: "abdulla",  b: "walid",    ag: null, bg: null },
-  { r:  9, leg: 1, a: "arittro",  b: "mrinmoy",  ag: null, bg: null },
+  { r:  9, leg: 1, a: "arittro",  b: "mrinmoy",  ag: 1, bg: 0 },
 
   // Round 10
   { r: 10, leg: 1, a: "sijad",    b: "arittro",  ag: null, bg: null },
-  { r: 10, leg: 1, a: "mrinmoy",  b: "abdulla",  ag: null, bg: null },
+  { r: 10, leg: 1, a: "mrinmoy",  b: "abdulla",  ag: 0, bg: 1 },
   { r: 10, leg: 1, a: "walid",    b: "jihad",    ag: null, bg: null },
   { r: 10, leg: 1, a: "abid",     b: "seam",     ag: null, bg: null },
   { r: 10, leg: 1, a: "piyal",    b: "jaheen",   ag: null, bg: null },
 
   // Round 11
-  { r: 11, leg: 1, a: "sijad",    b: "mrinmoy",  ag: null, bg: null },
+  { r: 11, leg: 1, a: "sijad",    b: "mrinmoy",  ag: 1, bg: 0 },
   { r: 11, leg: 1, a: "walid",    b: "arittro",  ag: null, bg: null },
   { r: 11, leg: 1, a: "abid",     b: "abdulla",  ag: null, bg: null },
   { r: 11, leg: 1, a: "piyal",    b: "jihad",    ag: null, bg: null },
@@ -95,13 +95,13 @@ export default [
   // Round 12
   { r: 12, leg: 2, a: "abid",     b: "sijad",    ag: null, bg: null },
   { r: 12, leg: 2, a: "walid",    b: "piyal",    ag: null, bg: null },
-  { r: 12, leg: 2, a: "mrinmoy",  b: "mahir",    ag: null, bg: null },
+  { r: 12, leg: 2, a: "mrinmoy",  b: "mahir",    ag: 0, bg: 1 },
   { r: 12, leg: 2, a: "abdulla",  b: "jaheen",   ag: null, bg: null },
   { r: 12, leg: 2, a: "jihad",    b: "seam",     ag: null, bg: null },
 
   // Round 13
   { r: 13, leg: 2, a: "walid",    b: "sijad",    ag: null, bg: null },
-  { r: 13, leg: 2, a: "mrinmoy",  b: "abid",     ag: null, bg: null },
+  { r: 13, leg: 2, a: "mrinmoy",  b: "abid",     ag: 0, bg: 1 },
   { r: 13, leg: 2, a: "arittro",  b: "piyal",    ag: null, bg: null },
   { r: 13, leg: 2, a: "abdulla",  b: "mahir",    ag: null, bg: null },
   { r: 13, leg: 2, a: "seam",     b: "jaheen",   ag: null, bg: null },
@@ -111,19 +111,19 @@ export default [
   { r: 14, leg: 2, a: "mahir",    b: "jihad",    ag: null, bg: null },
   { r: 14, leg: 2, a: "piyal",    b: "abdulla",  ag: null, bg: null },
   { r: 14, leg: 2, a: "abid",     b: "arittro",  ag: null, bg: null },
-  { r: 14, leg: 2, a: "walid",    b: "mrinmoy",  ag: null, bg: null },
+  { r: 14, leg: 2, a: "walid",    b: "mrinmoy",  ag: 1, bg: 0 },
 
   // Round 15
   { r: 15, leg: 2, a: "mahir",    b: "sijad",    ag: null, bg: null },
   { r: 15, leg: 2, a: "abid",     b: "jaheen",   ag: null, bg: null },
   { r: 15, leg: 2, a: "walid",    b: "seam",     ag: null, bg: null },
-  { r: 15, leg: 2, a: "mrinmoy",  b: "jihad",    ag: null, bg: null },
+  { r: 15, leg: 2, a: "mrinmoy",  b: "jihad",    ag: 0, bg: 1 },
   { r: 15, leg: 2, a: "arittro",  b: "abdulla",  ag: null, bg: null },
 
   // Round 16
   { r: 16, leg: 2, a: "abdulla",  b: "sijad",    ag: null, bg: null },
   { r: 16, leg: 2, a: "jihad",    b: "arittro",  ag: null, bg: null },
-  { r: 16, leg: 2, a: "seam",     b: "mrinmoy",  ag: null, bg: null },
+  { r: 16, leg: 2, a: "seam",     b: "mrinmoy",  ag: 1, bg: 0 },
   { r: 16, leg: 2, a: "jaheen",   b: "walid",    ag: null, bg: null },
   { r: 16, leg: 2, a: "mahir",    b: "piyal",    ag: null, bg: null },
 
@@ -131,7 +131,7 @@ export default [
   { r: 17, leg: 2, a: "seam",     b: "sijad",    ag: null, bg: null },
   { r: 17, leg: 2, a: "jaheen",   b: "jihad",    ag: null, bg: null },
   { r: 17, leg: 2, a: "mahir",    b: "arittro",  ag: null, bg: null },
-  { r: 17, leg: 2, a: "piyal",    b: "mrinmoy",  ag: null, bg: null },
+  { r: 17, leg: 2, a: "piyal",    b: "mrinmoy",  ag: 1, bg: 0 },
   { r: 17, leg: 2, a: "abid",     b: "walid",    ag: null, bg: null },
 
   // Round 18
@@ -139,17 +139,17 @@ export default [
   { r: 18, leg: 2, a: "piyal",    b: "seam",     ag: null, bg: null },
   { r: 18, leg: 2, a: "abid",     b: "jihad",    ag: null, bg: null },
   { r: 18, leg: 2, a: "walid",    b: "abdulla",  ag: null, bg: null },
-  { r: 18, leg: 2, a: "mrinmoy",  b: "arittro",  ag: null, bg: null },
+  { r: 18, leg: 2, a: "mrinmoy",  b: "arittro",  ag: 0, bg: 1 },
 
   // Round 19
   { r: 19, leg: 2, a: "piyal",    b: "sijad",    ag: null, bg: null },
   { r: 19, leg: 2, a: "abid",     b: "mahir",    ag: null, bg: null },
-  { r: 19, leg: 2, a: "mrinmoy",  b: "jaheen",   ag: null, bg: null },
+  { r: 19, leg: 2, a: "mrinmoy",  b: "jaheen",   ag: 0, bg: 1 },
   { r: 19, leg: 2, a: "arittro",  b: "seam",     ag: null, bg: null },
   { r: 19, leg: 2, a: "abdulla",  b: "jihad",    ag: null, bg: null },
 
   // Round 20
-  { r: 20, leg: 2, a: "mrinmoy",  b: "sijad",    ag: null, bg: null },
+  { r: 20, leg: 2, a: "mrinmoy",  b: "sijad",    ag: 0, bg: 1 },
   { r: 20, leg: 2, a: "arittro",  b: "walid",    ag: null, bg: null },
   { r: 20, leg: 2, a: "abdulla",  b: "abid",     ag: null, bg: null },
   { r: 20, leg: 2, a: "jihad",    b: "piyal",    ag: null, bg: null },
@@ -164,7 +164,7 @@ export default [
 
   // Round 22
   { r: 22, leg: 2, a: "arittro",  b: "sijad",    ag: null, bg: null },
-  { r: 22, leg: 2, a: "abdulla",  b: "mrinmoy",  ag: null, bg: null },
+  { r: 22, leg: 2, a: "abdulla",  b: "mrinmoy",  ag: 1, bg: 0 },
   { r: 22, leg: 2, a: "jihad",    b: "walid",    ag: null, bg: null },
   { r: 22, leg: 2, a: "seam",     b: "abid",     ag: null, bg: null },
   { r: 22, leg: 2, a: "jaheen",   b: "piyal",    ag: null, bg: null },
