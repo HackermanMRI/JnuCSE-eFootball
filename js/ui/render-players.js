@@ -34,27 +34,53 @@ export function renderPlayersPage(model) {
     };
   });
 
-  const list = el("div", { class: "news-list players-grid" }, items.map(i => i.node));
+  /* Two independent columns, not a grid. In a grid each row is as tall as
+     its tallest card, so opening one card left a gap beside it. Here each
+     column stacks on its own: an open card only pushes down its own column.
+     Visible card k goes to column k % 2, so A to Z still reads left, right,
+     left, right across the page. Narrow screens use the first column only
+     (stacking the two columns would read 1, 3, 5 … 2, 4, 6). */
+  const cols = [el("div", { class: "players-col" }), el("div", { class: "players-col" })];
+  const list = el("div", { class: "players-cols" }, cols);
+  const wide = matchMedia("(min-width: 980px)");
+  let visible = items;
+
+  /* Cards are kept, not rebuilt, so an open card stays open through search
+     and resizing. A card is only moved when its place actually changes. */
+  function place() {
+    const n = wide.matches ? 2 : 1;
+    cols[1].hidden = n === 1;
+    for (const item of items) item.node.hidden = !visible.includes(item);
+    cols.forEach((col, c) => {
+      const want = c < n ? visible.filter((_, k) => k % n === c).map(i => i.node) : [];
+      let ref = col.firstChild;
+      for (const node of want) {
+        while (ref && ref.hidden && !want.includes(ref)) ref = ref.nextSibling;
+        if (node === ref) { ref = ref.nextSibling; continue; }
+        col.insertBefore(node, ref);
+      }
+    });
+    /* Hidden cards stay in the first column, out of the way. */
+    for (const item of items) if (item.node.hidden && item.node.parentNode !== cols[0]) cols[0].append(item.node);
+  }
+  place();
+  wide.addEventListener("change", place);
+
   const note = el("p", { class: "feed-status", role: "status" });
   const none = el("div", { hidden: "" });
 
-  /* Cards are hidden, not rebuilt, so an open card stays open while typing.
-     The cards that remain glide into their new places (FLIP) rather than
+  /* The cards that stay glide into their new places (FLIP) rather than
      jumping, and cards coming back fade in. */
   const bar = searchBar({
     label: "Search players by name",
     onChange: query => {
-      let shown = 0;
       flip(items.map(i => i.node), () => {
-        for (const item of items) {
-          const hit = matchesQuery(item.name, query);
-          item.node.hidden = !hit;
-          if (hit) shown++;
-        }
+        visible = items.filter(item => matchesQuery(item.name, query));
+        place();
         const searching = query.trim() !== "";
-        note.textContent = searching && shown ? `${shown} of ${items.length} players` : "";
-        none.hidden = shown > 0;
-        if (!shown) none.replaceChildren(noMatches(query, "players"));
+        note.textContent = searching && visible.length ? `${visible.length} of ${items.length} players` : "";
+        none.hidden = visible.length > 0;
+        if (!visible.length) none.replaceChildren(noMatches(query, "players"));
       });
     }
   });

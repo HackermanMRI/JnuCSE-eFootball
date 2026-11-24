@@ -37,6 +37,7 @@ export function accordion({ head, body, open = false, tier, onFirstOpen }) {
 
   let anim = null;
   let opened = open;
+  let settle = 0;
 
   function setOpen(next, { animate = true, reveal = true } = {}) {
     if (next && lazy && !inner.firstChild) inner.append(body());
@@ -46,6 +47,12 @@ export function accordion({ head, body, open = false, tier, onFirstOpen }) {
 
     button.setAttribute("aria-expanded", String(next));
     card.classList.toggle("is-open", next);
+
+    /* The contents' entrance animations run only while opening (see
+       animations.css), so moving an open card does not replay them. */
+    clearTimeout(settle);
+    card.classList.toggle("is-opening", next);
+    if (next) settle = setTimeout(() => card.classList.remove("is-opening"), 1500);
 
     panel.style.height = "auto";
     const to = next ? panel.scrollHeight : 0;
