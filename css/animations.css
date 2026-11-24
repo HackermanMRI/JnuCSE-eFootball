@@ -240,19 +240,23 @@ html.vt-in .split-char {
 
 /* ---- Accordion content: the sections settle one after another ---------- */
 
-.acc.is-open .acc-inner > * {
+/* These play while a card is opening (.is-opening, set for a moment by
+   js/ui/interactions.js), not whenever it is open. Moving an open card
+   (the Players columns do on search) restarts CSS animations, and the
+   contents would otherwise rise in again. */
+.acc.is-opening .acc-inner > * {
   animation: rise var(--dur-slow) var(--spring-gentle) both;
   animation-delay: calc(var(--k, 0) * 55ms + 70ms);
 }
 /* "backwards", not "both": once it has arrived, the photo must be free to
    tilt toward the pointer (components.css). */
-.acc.is-open .career > * {
+.acc.is-opening .career > * {
   animation: rise var(--dur-slow) var(--spring-gentle) backwards;
   animation-delay: calc(var(--k, 0) * 70ms + 90ms);
 }
 /* The photo settles from slightly zoomed in (it fades in by blur-up). */
-.acc.is-open .portrait img,
-.acc.is-open .portrait-fallback {
+.acc.is-opening .portrait img,
+.acc.is-opening .portrait-fallback {
   animation: portraitIn var(--dur-xslow) var(--spring-gentle) 80ms both;
 }
 @keyframes portraitIn {
@@ -262,12 +266,12 @@ html.vt-in .split-char {
 
 /* The won / drawn / lost bar grows out from the left. */
 @keyframes barIn { from { transform: scaleX(0); opacity: 0; } to { transform: none; opacity: 1; } }
-.acc.is-open .split-bar i {
+.acc.is-opening .split-bar i {
   animation: barIn var(--dur-xslow) var(--spring-gentle) both;
   animation-delay: 320ms;
 }
-.acc.is-open .split-bar .d { animation-delay: 400ms; }
-.acc.is-open .split-bar .l { animation-delay: 480ms; }
+.acc.is-opening .split-bar .d { animation-delay: 400ms; }
+.acc.is-opening .split-bar .l { animation-delay: 480ms; }
 
 /* A card opened from a link (players.html#player-…) pulses once. */
 .acc.is-target { animation: targetPulse 1.4s var(--ease-out) 1; }

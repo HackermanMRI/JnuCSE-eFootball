@@ -44,6 +44,27 @@ export default {
     ],
     "w": 1600
   },
+  "assets/news/midexit.jpeg": {
+    "h": 640,
+    "ph": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADQAQCdASoQAAcAA4BaJQBOgB6CoQzOgAD+6fnk359vKpv355qRtS7/i9am2Z3dEnr/7JlItKEJuw7c3g4jAAAA",
+    "sha": "8eb6fb0f49d6",
+    "sizes": [
+      640,
+      1280,
+      1493
+    ],
+    "w": 1493
+  },
+  "assets/news/mrinmoyretire.jpeg": {
+    "h": 500,
+    "ph": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAAAQAgCdASoQAAcAA4BaJZQC7AEQ4+5K6q+gAP7R4z1wmG1wVkbmsEi9lhut2vpdm1LJfxJDEeUEvHbl4AA=",
+    "sha": "543f5eb547f7",
+    "sizes": [
+      640,
+      1200
+    ],
+    "w": 1200
+  },
   "assets/news/proposal.jpeg": {
     "h": 656,
     "ph": "data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAADQAQCdASoQAAcAA4BaJbACdADbISgz8AD+7y18Fp9omPKE+wzBTzPWsxf77zk7pwR/cXsbG5k1uxp/CMhvJvrWBEf/Vo8tHi47AI4uAAA=",

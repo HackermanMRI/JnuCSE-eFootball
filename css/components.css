@@ -689,14 +689,16 @@ tr[data-zone="relegation"]{ background: linear-gradient(90deg, rgba(242,104,107,
 
 .news-list { display: flex; flex-direction: column; gap: var(--s-4); }
 
-/* Players: two columns when there is room. A card that opens only pushes
-   its own column down. */
-@media (min-width: 980px) {
-  .players-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
+/* Players: two independent columns (js/ui/render-players.js decides which
+   card goes where; below 980px everything is in the first column). Each
+   column stacks on its own, so an open card only pushes down its own column. */
+.players-cols { display: flex; align-items: flex-start; gap: var(--s-4); }
+.players-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
 }
 
 .news-media {
