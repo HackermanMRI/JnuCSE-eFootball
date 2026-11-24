@@ -6,7 +6,7 @@
    nothing is calculated here.
    ========================================================================= */
 
-import { el, nameOf, avatar, initials, emptyState, starIcon } from "./dom.js";
+import { el, nameOf, avatar, initials, emptyState, starIcon, formRow } from "./dom.js";
 import { accordion, revealNow } from "./interactions.js";
 import { searchBar, noMatches } from "./search.js";
 import { matchesQuery } from "../core/search.js";
@@ -124,7 +124,11 @@ function careerCard(model, c) {
     avatar(model, c.id),
     el("div", { class: "grow" },
       el("div", { class: "acc-title" }, name),
-      el("div", { class: "acc-sub" }, sub)
+      el("div", { class: "acc-sub" }, sub),
+      c.form.length
+        ? el("div", { class: "player-form", title: "Last results, oldest first" },
+            formRow(c.form.slice(-model.config.formLength)))
+        : null
     ),
     headStars(c.trophies)
   );

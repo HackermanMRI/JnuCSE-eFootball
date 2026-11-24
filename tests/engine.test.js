@@ -645,6 +645,17 @@ describe("Player careers", () => {
     eq(a.bestWinStreak.live, true);                                                    // it ended in a season still in progress
   });
 
+  it("form lists every result in match order and runs on across seasons", () => {
+    const s1 = season(1, true, ["a", "z"], [], [
+      fx("a", "z", 1, 0, 2), fx("a", "z", 1, 1, 1), fx("a", "z", 0, 2, 3), fx("a", "z", null, null, 4)   // rounds out of order; round 4 unplayed
+    ], [], { champion: "z", secondTable: [] });
+    const s2 = season(2, false, ["a", "z"], [], [fx("z", "a", 0, 3, 1), fx("a", "z", 2, 2, 2)]);
+    const cs = buildCareers([s1, s2], byId);
+    eq(find(cs, "a").form, ["D", "W", "L", "W", "D"]);
+    eq(find(cs, "z").form, ["D", "L", "W", "L", "D"]);
+    eq(find(buildCareers([season(1, false, ["a", "q"], [], [])], byId), "q").form, []);
+  });
+
   it("the streak record only changes for a LONGER run; an equal run keeps the earlier one", () => {
     const s = season(1, false, ["a", "z"], [], [
       fx("a", "z", 1, 0, 1), fx("a", "z", 1, 0, 2), fx("a", "z", 0, 0, 3),   // first run: 2
