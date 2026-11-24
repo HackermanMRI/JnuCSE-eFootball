@@ -224,5 +224,4 @@ It’s completely over. Shimanto leaves the virtual pitch after a memorable 7-ye
 Here we go, confirmed. 🏁
 `}
 
-
 ];
