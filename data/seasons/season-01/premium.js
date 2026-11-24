@@ -70,17 +70,17 @@ export default [
   { r:  8, leg: 1, a: "shifadul",  b: "rifat",     ag: 1, bg: 0},
 
   // Round 9
-  { r:  9, leg: 1, a: "arnish",    b: "sun",       ag: null, bg: null },
-  { r:  9, leg: 1, a: "robi",      b: "sabid",     ag: null, bg: null },
+  { r:  9, leg: 1, a: "arnish",    b: "sun",       ag: 3, bg: 1 },
+  { r:  9, leg: 1, a: "robi",      b: "sabid",     ag: 1, bg: 3 },
   { r:  9, leg: 1, a: "shifadul",  b: "shuvo",     ag: null, bg: null },
-  { r:  9, leg: 1, a: "rifat",     b: "aliul",     ag: null, bg: null },
+  { r:  9, leg: 1, a: "rifat",     b: "aliul",     ag: 0, bg: 1 },
   { r:  9, leg: 1, a: "rimon",     b: "nahid",     ag: null, bg: null },
 
   /* ================= LEG 2 ================= */
 
   // Round 10
   { r: 10, leg: 2, a: "shifadul",  b: "arnish",    ag: null, bg: null },
-  { r: 10, leg: 2, a: "robi",      b: "rifat",     ag: null, bg: null },
+  { r: 10, leg: 2, a: "robi",      b: "rifat",     ag: 1, bg: 0 },
   { r: 10, leg: 2, a: "sun",       b: "rimon",     ag: null, bg: null },
   { r: 10, leg: 2, a: "sabid",     b: "nahid",     ag: null, bg: null },
   { r: 10, leg: 2, a: "shuvo",     b: "aliul",     ag: null, bg: null },
@@ -89,7 +89,7 @@ export default [
   { r: 11, leg: 2, a: "sun",       b: "arnish",    ag: null, bg: null },
   { r: 11, leg: 2, a: "sabid",     b: "robi",      ag: null, bg: null },
   { r: 11, leg: 2, a: "shuvo",     b: "shifadul",  ag: null, bg: null },
-  { r: 11, leg: 2, a: "aliul",     b: "rifat",     ag: null, bg: null },
+  { r: 11, leg: 2, a: "aliul",     b: "rifat",     ag: 1, bg: 0 },
   { r: 11, leg: 2, a: "nahid",     b: "rimon",     ag: null, bg: null },
 
   // Round 12
@@ -97,17 +97,17 @@ export default [
   { r: 12, leg: 2, a: "shuvo",     b: "sun",       ag: null, bg: null },
   { r: 12, leg: 2, a: "aliul",     b: "robi",      ag: null, bg: null },
   { r: 12, leg: 2, a: "nahid",     b: "shifadul",  ag: null, bg: null },
-  { r: 12, leg: 2, a: "rimon",     b: "rifat",     ag: null, bg: null },
+  { r: 12, leg: 2, a: "rimon",     b: "rifat",     ag: 1, bg: 0 },
 
   // Round 13
   { r: 13, leg: 2, a: "shuvo",     b: "arnish",    ag: null, bg: null },
   { r: 13, leg: 2, a: "aliul",     b: "sabid",     ag: null, bg: null },
   { r: 13, leg: 2, a: "nahid",     b: "sun",       ag: null, bg: null },
   { r: 13, leg: 2, a: "rimon",     b: "robi",      ag: null, bg: null },
-  { r: 13, leg: 2, a: "rifat",     b: "shifadul",  ag: null, bg: null },
+  { r: 13, leg: 2, a: "rifat",     b: "shifadul",  ag: 0, bg: 1 },
 
   // Round 14
-  { r: 14, leg: 2, a: "rifat",     b: "arnish",    ag: null, bg: null },
+  { r: 14, leg: 2, a: "rifat",     b: "arnish",    ag: 0, bg: 1 },
   { r: 14, leg: 2, a: "shifadul",  b: "rimon",     ag: null, bg: null },
   { r: 14, leg: 2, a: "robi",      b: "nahid",     ag: null, bg: null },
   { r: 14, leg: 2, a: "sun",       b: "aliul",     ag: null, bg: null },
@@ -115,7 +115,7 @@ export default [
 
   // Round 15
   { r: 15, leg: 2, a: "rimon",     b: "arnish",    ag: null, bg: null },
-  { r: 15, leg: 2, a: "rifat",     b: "nahid",     ag: null, bg: null },
+  { r: 15, leg: 2, a: "rifat",     b: "nahid",     ag: 0, bg: 1 },
   { r: 15, leg: 2, a: "shifadul",  b: "aliul",     ag: null, bg: null },
   { r: 15, leg: 2, a: "robi",      b: "shuvo",     ag: null, bg: null },
   { r: 15, leg: 2, a: "sun",       b: "sabid",     ag: null, bg: null },
@@ -123,7 +123,7 @@ export default [
   // Round 16
   { r: 16, leg: 2, a: "nahid",     b: "arnish",    ag: null, bg: null },
   { r: 16, leg: 2, a: "rimon",     b: "aliul",     ag: null, bg: null },
-  { r: 16, leg: 2, a: "rifat",     b: "shuvo",     ag: null, bg: null },
+  { r: 16, leg: 2, a: "rifat",     b: "shuvo",     ag: 0, bg: 1 },
   { r: 16, leg: 2, a: "shifadul",  b: "sabid",     ag: null, bg: null },
   { r: 16, leg: 2, a: "robi",      b: "sun",       ag: null, bg: null },
 
@@ -131,13 +131,13 @@ export default [
   { r: 17, leg: 2, a: "aliul",     b: "arnish",    ag: null, bg: null },
   { r: 17, leg: 2, a: "nahid",     b: "shuvo",     ag: null, bg: null },
   { r: 17, leg: 2, a: "rimon",     b: "sabid",     ag: null, bg: null },
-  { r: 17, leg: 2, a: "rifat",     b: "sun",       ag: null, bg: null },
+  { r: 17, leg: 2, a: "rifat",     b: "sun",       ag: 0, bg: 1 },
   { r: 17, leg: 2, a: "shifadul",  b: "robi",      ag: null, bg: null },
 
   // Round 18
   { r: 18, leg: 2, a: "robi",      b: "arnish",    ag: null, bg: null },
   { r: 18, leg: 2, a: "sun",       b: "shifadul",  ag: null, bg: null },
-  { r: 18, leg: 2, a: "sabid",     b: "rifat",     ag: null, bg: null },
+  { r: 18, leg: 2, a: "sabid",     b: "rifat",     ag: 1, bg: 0 },
   { r: 18, leg: 2, a: "shuvo",     b: "rimon",     ag: null, bg: null },
   { r: 18, leg: 2, a: "aliul",     b: "nahid",     ag: null, bg: null },
 ];
