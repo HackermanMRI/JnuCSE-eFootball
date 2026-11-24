@@ -20,6 +20,10 @@
                       an equal run never replaces the earlier one. It notes
                       the season the run started and ended in, and whether
                       it is still going
+     form             every result as "W", "D" or "L", oldest first, over
+                      the whole career, so it runs on from one season into
+                      the next. The page shows the last few (config
+                      formLength)
      trophies         Premium champion and Second Tier winner of a
                       completed season
    Where most-goals records tie, every tied season is listed.
@@ -38,6 +42,7 @@ const blank = id => ({
   biggestLoss: null,
   mostGoalsInSeason: null,
   bestWinStreak: null,
+  form: [],
   trophies: [],
   seasons: []
 });
@@ -90,6 +95,7 @@ export function buildCareers(seasons, byId = new Map()) {
 
           if (side.own > side.opp) {
             c.won++;
+            c.form.push("W");
             if (++st.run === 1) st.start = s.number;
             if (!c.bestWinStreak || st.run > c.bestWinStreak.length) {
               c.bestWinStreak = { length: st.run, from: st.start, to: s.number, live, active: true };
@@ -98,12 +104,14 @@ export function buildCareers(seasons, byId = new Map()) {
             if (beats(cand, c.biggestWin, "for")) c.biggestWin = cand;
           } else if (side.own < side.opp) {
             c.lost++;
+            c.form.push("L");
             st.run = 0;
             if (c.bestWinStreak) c.bestWinStreak.active = false;
             const cand = { margin: side.opp - side.own, for: side.own, against: side.opp, ...where };
             if (beats(cand, c.biggestLoss, "against")) c.biggestLoss = cand;
           } else {
             c.drawn++;
+            c.form.push("D");
             st.run = 0;
             if (c.bestWinStreak) c.bestWinStreak.active = false;
           }

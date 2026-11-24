@@ -48,7 +48,7 @@ export function renderStandings(model, season, tier) {
   const head = el("tr", {},
     el("th", { scope: "col" }, "#"),
     el("th", { scope: "col" }, "Player"),
-    COLS.map(c => el("th", { scope: "col", title: c.title, "data-slim": c.slim ? "1" : "0" }, c.label)),
+    COLS.map(c => el("th", { scope: "col", title: c.title, "data-slim": c.slim ? "1" : "0", class: c.k === "gd" ? "gd-col" : null }, c.label)),
     el("th", { scope: "col", class: "pts-col", title: "Points" }, "Pts"),
     el("th", { scope: "col", class: "form-col", title: "Last five results, oldest first" }, "Form")
   );
@@ -71,7 +71,7 @@ export function renderStandings(model, season, tier) {
       class: "num" + (c.k === "gd" ? ` c-gd ${r.gd > 0 ? "pos" : r.gd < 0 ? "neg" : ""}` : "")
     }, c.k === "gd" ? signed(r.gd) : String(r[c.k]))),
     el("td", { class: "c-pts num" }, el("span", { class: "roll" }, el("span", {}, String(r.pts)))),
-    el("td", {}, formRow(r.form.slice(-model.config.formLength), i))
+    el("td", { class: "c-form" }, formRow(r.form.slice(-model.config.formLength), i))
   ));
 
   return el("div", { class: "table-wrap" },

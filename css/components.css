@@ -259,32 +259,37 @@ tr[data-zone="relegation"]{ background: linear-gradient(90deg, rgba(242,104,107,
 .table-key span { display: flex; align-items: center; gap: var(--s-2); }
 .table-key i { width: 12px; height: 4px; border-radius: 2px; display: block; }
 
-/* Narrow tables keep rank, player, played, GD, points and form, in fixed
-   columns so long names shorten instead of pushing Form off screen. */
+/* Phones: every number column stays (P, W, D, L, GF, GA, GD, Pts), in fixed
+   widths so the table fits the screen without scrolling sideways. Form moves
+   off the table here (each player's form is on the Players tab), which leaves
+   room for the photo and for names, which wrap onto a second line instead of
+   being cut off. Widths are border-box (base.css), so they include padding. */
 @container (max-width: 620px) {
-  table.standings { min-width: 0; table-layout: fixed; }
-  .standings th[data-slim="0"],
-  .standings td[data-slim="0"] { display: none; }
-  .standings thead th,
-  .standings tbody td { padding: var(--s-3) 3px; }
-  .standings th:first-child, .standings td:first-child { padding-left: var(--s-3); }
-  .standings th:last-child, .standings td:last-child { padding-right: var(--s-3); }
-  /* Fixed layout sizes columns from the header row. */
-  .standings thead th:first-child { width: 36px; }
+  table.standings { min-width: 0; table-layout: fixed; font-size: 12px; }
+  .standings .form-col, .standings .c-form { display: none; }
+  .standings thead th { padding: 9px 2px; font-size: 10px; letter-spacing: .02em; text-align: center; }
+  .standings tbody td { padding: 8px 2px; text-align: center; }
+  .standings th:first-child, .standings td:first-child { padding-left: 8px; text-align: left; }
+  .standings thead th.pts-col, .standings .c-pts { padding-right: 10px; text-align: right; }
+  .standings thead th:nth-child(2), .standings .c-player { text-align: left; }
+
+  .standings thead th:first-child { width: 26px; }
   .standings thead th:nth-child(2) { width: auto; }
-  .standings thead th[data-slim="1"] { width: 32px; }
-  .standings thead th.pts-col { width: 36px; }
-  .standings thead th.form-col { width: 106px; }
+  .standings thead th[data-slim] { width: 21px; }
+  .standings thead th.gd-col { width: 28px; }
+  .standings thead th.pts-col { width: 34px; }
+
+  .standings .c-pts { font-size: var(--t-sm); }
   .standings .c-player { width: auto; min-width: 0; }
-  .standings .player-link { gap: var(--s-2); }
-  .standings .player-cell .avatar { width: 26px; height: 26px; }
-  .standings .c-player .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .standings .form-row { gap: 2px; }
-  .standings .form-pill { width: 16px; height: 16px; font-size: 9px; border-radius: 4px; }
-}
-/* The narrowest phones: names matter more than faces in a table. */
-@container (max-width: 340px) {
-  .standings .player-cell .avatar { display: none; }
+  .standings .player-link { gap: 8px; min-height: 32px; }
+  .standings .player-cell .avatar { width: 26px; height: 26px; flex: none; }
+  .standings .c-player .name {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    line-height: 1.25;
+  }
 }
 
 /* ---- Form pills -------------------------------------------------------- */
@@ -663,6 +668,8 @@ tr[data-zone="relegation"]{ background: linear-gradient(90deg, rgba(242,104,107,
   transition: color var(--dur-fast) var(--ease-out);
 }
 .acc-sub { font-size: var(--t-xs); color: var(--faint); margin-top: 3px; }
+/* The last few results under a player's name on the Players tab. */
+.player-form { margin-top: 7px; line-height: 0; }
 .acc-head .grow { flex: 1; min-width: 0; }
 
 .acc-chevron {
@@ -1044,6 +1051,8 @@ tr[data-zone="relegation"]{ background: linear-gradient(90deg, rgba(242,104,107,
 /* ---- Responsive -------------------------------------------------------- */
 
 @media (max-width: 760px) {
+  /* The points table uses nearly the full screen width on a phone. */
+  .table-wrap:has(.standings) { margin-inline: calc(6px - var(--gutter)); }
   .movement { grid-template-columns: 1fr; }
   .meta-line { flex-direction: column; gap: var(--s-1); }
   .meta-line .k { width: auto; }

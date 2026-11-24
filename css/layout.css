@@ -329,8 +329,11 @@ html.has-tabs .edge-top {
 @media (max-width: 760px) {
   :root { --t-xl: 1.5rem; }
 
-  .page-head { padding: var(--s-5) 0 var(--s-4); margin-bottom: var(--s-4); }
-  .page-head .sub { font-size: var(--t-base); }
+  /* A smaller heading, so the content starts higher on a phone. */
+  .page-head { padding: var(--s-4) 0 var(--s-3); margin-bottom: var(--s-3); }
+  .page-head h1 { font-size: 1.75rem; }
+  .page-head .kicker { margin-bottom: var(--s-2); font-size: 11px; }
+  .page-head .sub { margin-top: var(--s-2); font-size: var(--t-sm); line-height: 1.5; }
 
   .site-header .shell { padding-inline: max(22px, calc(var(--safe-l) + 12px)) max(22px, calc(var(--safe-r) + 12px)); }
   .site-header::before,
