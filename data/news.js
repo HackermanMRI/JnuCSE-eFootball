@@ -172,6 +172,56 @@ Shimanto’s early campaign was defined by hardship, managing only a single vict
 His back-to-back victories have not only humbled rival contenders but also sent shockwaves across the division. Opponents who previously dismissed his chances now face a fierce competitor operating at peak confidence.
 
 With momentum fully on his side, Shimanto is driven by a singular goal: securing automatic promotion to the elite Premium League. The crucial question now remains whether any challenger can halt his explosive win streak before he reaches the top flight.
+`},
+
+{
+    id: "mid-season-exit",
+     title: "SHOCKWAVES IN THE ARENA: Mid-Season Departures shocked JnU CSE eFootball League",
+     banner: "assets/news/midexit.jpeg",
+     date: "2026-11-23",
+     pinned: false,
+     body: `
+     DHAKA — The ongoing JnU CSE eFootball League has been thrown into unexpected turmoil following the sudden mid-season departures of two prominent contenders, Ashraful Al Rifat and Mrinmoy Shimanto. While one exit comes as a temporary setback caused by hardware trouble, the other has stunned the campus esports community with an abrupt retirement announcement.
+
+Shimanto Drops Retirement Bombshell Amid Solid Tier 2 Campaign
+The biggest shock of the tournament arrived from Tier 2, where Mrinmoy Shimanto announced his sudden retirement from competitive eFootball.
+
+Before stepping away, Shimanto was enjoying a steady run of form. Sitting comfortably in 5th position on the Tier 2 standings with a balanced record of 2 wins, 1 draw, and 2 losses, he looked well-positioned to push for the upper spots. However, an unexpected illness forced him to take a temporary break from the virtual pitch to focus on his recovery.
+
+While fans and fellow competitors anticipated his eventual comeback once back to full health, Shimanto stunned everyone by declaring his permanent retirement from his eFootball career—bringing an abrupt close to a promising season.
+
+Hardware Failure Forces Rifat to the Sidelines—For Now
+Meanwhile, Ashraful Al Rifat has officially withdrawn from the current campaign before even kicking a virtual ball.
+
+Rifat’s highly anticipated debut was repeatedly delayed due to an untimely phone failure that left him unable to compete. After holding out hope for a fix, he ultimately made the difficult decision to step back from the league for the remainder of the season.
+
+Unlike Shimanto’s permanent farewell, however, Rifat offered a clear message of defiance to his rivals, confirming that his absence is strictly temporary and vowing to return to the league next season.
+`},
+
+{
+    id: "mid-season-exit",
+     title: "🚨 BREAKING: MRINMOY SHIMANTO RETIRES FROM eFOOTBALL!",
+     banner: "assets/news/mrinmoyretire.jpeg",
+     date: "2026-11-24",
+     pinned: true,
+     body: `
+      EXCLUSIVE: The biggest shock of the tournament has just arrived from Tier 2 of the JnU CSE eFootball League. Mrinmoy Shimanto has made the sudden decision to retire from competitive eFootball with immediate effect! 🇧🇩🎮
+
+Understand Shimanto has officially declared his permanent retirement from the virtual pitch, bringing an abrupt end to his season and competitive career spanning from 2019 to 2026.
+
+Key details behind the decision:
+
+🌡️ Health priority: After suffering an unexpected illness, Shimanto had taken a temporary break to focus on recovery. He has now decided to step away permanently.
+
+📈 Solid campaign: Before stepping down, he was enjoying a very steady Tier 2 run, sitting 5th in the standings with a balanced 2 wins, 1 draw, and 2 losses—well-positioned to push for upper spots.
+
+🚪 Final farewell: Despite fans and rivals expecting a comeback, he calls time on a 7-year competitive journey (2019–2026).
+
+It’s completely over. Shimanto leaves the virtual pitch after a memorable 7-year run.
+
+🤝 “Thanks for the journey” — message of gratitude shared as the league bids farewell to a Tier 2 stalwart.
+
+Here we go, confirmed. 🏁
 `}
 
 
