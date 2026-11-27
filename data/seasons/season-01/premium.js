@@ -79,7 +79,7 @@ export default [
   /* ================= LEG 2 ================= */
 
   // Round 10
-  { r: 10, leg: 2, a: "shifadul",  b: "arnish",    ag: null, bg: null },
+  { r: 10, leg: 2, a: "shifadul",  b: "arnish",    ag: 1, bg: 2 },
   { r: 10, leg: 2, a: "robi",      b: "rifat",     ag: 1, bg: 0 },
   { r: 10, leg: 2, a: "sun",       b: "rimon",     ag: null, bg: null },
   { r: 10, leg: 2, a: "sabid",     b: "nahid",     ag: null, bg: null },
